@@ -1,6 +1,9 @@
     section .entry
     extern init64
     ; 寄存器ebx是multiboot2 information，不可以使用
+    ;
+    ; 由于这个代码是32位环境的代码，而链接器链接时会把它当作64位代码链接
+    ; 所以这里所有的使用了常数的位置都要通过指令写入
 init32:
     cli
 
@@ -34,15 +37,18 @@ init32:
         add edi, 4
     loop init32_loop0
 
+    ; 设置gdt_ptr
+    mov eax, 0x10402a
+    mov dword [eax], 0x104000
     ; 加载GDTR和段寄存器
+    db 0x66
+    lgdt [0x104028]
     mov ax, 0x10
     mov ds, ax
-    ; mov ss, ax
+    mov ss, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
-    db 0x66
-    lgdt [0x104028]
 
     ; 打开PAE
     mov eax, cr4
@@ -61,6 +67,7 @@ init32:
 
     ; 打开分页机制
     mov eax, cr0
+    bts eax, 0
     bts eax, 31
     mov cr0, eax
 
