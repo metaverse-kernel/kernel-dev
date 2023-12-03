@@ -10,6 +10,7 @@ run:
 	@qemu-system-x86_64 -m 4G metaverse.img -enable-kvm -bios ${BIOS}
 
 debug:
+	@echo "在gdb中连接远程目标'localhost:1234'即可"
 	@sudo modprobe nbd
 	@make load
 	@qemu-system-x86_64 -m 4G metaverse.img -enable-kvm -bios ${BIOS} -s -S
