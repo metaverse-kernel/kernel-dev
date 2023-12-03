@@ -2,6 +2,37 @@
 
 基于multiboot2引导的64位内核。
 
+## 试用
+
+* 编译
+
+```bash
+make
+```
+
+* 编译发布版
+
+```bash
+make release=1
+```
+
+* 运行
+
+```bash
+make run
+```
+
+* gdb调试
+
+```bash
+make debug
+```
+
+## 依赖项
+
+* nbd
+* qemu
+
 ## 开发计划
 
 * 重新设置内核分页前的准备：
