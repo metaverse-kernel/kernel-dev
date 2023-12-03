@@ -35,16 +35,14 @@ init32:
     loop init32_loop0
 
     ; 加载GDTR和段寄存器
-    db 0x66
-    lgdt [0x104028]
-    jmp after_lgdt
-    after_lgdt:
     mov ax, 0x10
     mov ds, ax
-    ; mov es, ax
+    ; mov ss, ax
+    mov es, ax
     mov fs, ax
     mov gs, ax
-    mov ss, ax
+    db 0x66
+    lgdt [0x104028]
 
     ; 打开PAE
     mov eax, cr4
@@ -96,14 +94,3 @@ gdt_end:
 gdt_ptr:
     dw  gdt_end - gdt - 1
     dq  gdt
-
-    ; 临时的32位分段
-gdt32:
-    dq 0
-    dq 0x00cf9a000000ffff
-    dq 0x00cf92000000ffff
-gdt32_end:
-
-gdt32_ptr:
-    dw gdt32_end - gdt32_end - 1
-    dd gdt32
