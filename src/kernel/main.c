@@ -1,5 +1,6 @@
 #include <kernel/kernel.h>
 #include <kernel/tty.h>
+#include <kernel/memm.h>
 
 #include <libk/multiboot2.h>
 
@@ -8,8 +9,22 @@ void get_frame_buffer_with_bootinfo(framebuffer *fb, bootinfo_t *bootinfo);
 
 void kmain(void *mb2_bootinfo)
 {
+    // 创建bootinfo对象
     bootinfo_t bootinfo;
     bootinfo_new(&bootinfo, mb2_bootinfo);
+
+    // 获取内存信息
+    void **tags;
+    usize tags_amount;
+    if ((tags_amount = bootinfo_get_tag(bootinfo, BOOTINFO_BASIC_MEMORY_INFO_TYPE, &tags)) == 0)
+    {
+        KERNEL_TODO();
+    }
+    bootinfo_basic_memory_info_t *meminfo = bootinfo_basic_memory_info(tags[0]);
+    usize mem_size = 1024 * 1024 + meminfo->mem_upper * 1024;
+
+    // 初始化内存管理模块
+    mem_manager_t *memm = memm_new(mem_size);
 
     tty_controller_init();
 
@@ -34,4 +49,16 @@ void get_frame_buffer_with_bootinfo(framebuffer *fb, bootinfo_t *bootinfo)
     {
         KERNEL_TODO();
     }
+    bootinfo_framebuffer_info_t *fbinfo = bootinfo_framebuffer_info(tags[0]);
+    fb->pointer = (void *)fbinfo->framebuffer_addr;
+    fb->width = fbinfo->framebuffer_width;
+    fb->height = fbinfo->framebuffer_height;
+    fb->pixsize = fbinfo->framebuffer_bpp / 8;
+    // TODO 对应内存空间还没有分页
+    KERNEL_TODO();
+    for (usize i = 0; i < 10000; i++)
+    {
+        ((u8 *)fb->pointer)[i] = 0xff;
+    }
+    KERNEL_TODO();
 }

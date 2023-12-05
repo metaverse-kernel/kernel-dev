@@ -8,17 +8,17 @@ init32:
     cli
 
     ; 设置PML4的第0项
-    mov eax, 0x102000
+    mov eax, 0x102000   ; PDPT0
     add eax, 0x003
-    mov edi, 0x101000
+    mov edi, 0x101000   ; PML4
     mov dword [edi], eax
     add edi, 4
     mov dword [edi], 0
 
     ; 设置PDPT的第0项
-    mov eax, 0x103000
+    mov eax, 0x103000   ; PD0
     add eax, 0x003
-    mov edi, 0x102000
+    mov edi, 0x102000   ; PDPT0
     mov dword [edi], eax
     add edi, 4
     mov dword [edi], 0
@@ -26,23 +26,23 @@ init32:
     ; 设置PD0中的PDE
     mov ecx, 64
     mov eax, 0
-    mov edi, 0x103000
+    mov edi, 0x103000   ; PD0
     init32_loop0:
         mov edx, eax
         add edx, 0x183
         mov dword [edi], edx
-        add eax, 0x400000   ; 2MB
+        add eax, 0x200000   ; 2MB
         add edi, 4
         mov dword [edi], 0
         add edi, 4
     loop init32_loop0
 
     ; 设置gdt_ptr
-    mov eax, 0x10402a
-    mov dword [eax], 0x104000
+    mov eax, 0x10402a   ; gdt_ptr + 2
+    mov dword [eax], 0x104000   ; gdt
     ; 加载GDTR和段寄存器
     db 0x66
-    lgdt [0x104028]
+    lgdt [0x104028]     ; gdt_ptr
     mov ax, 0x10
     mov ds, ax
     mov ss, ax
@@ -56,7 +56,7 @@ init32:
     mov cr4, eax
 
     ; 加载cr3
-    mov eax, 0x101000
+    mov eax, 0x101000   ; PML4
     mov cr3, eax
 
     ; 切换ia32e模式
@@ -65,7 +65,7 @@ init32:
     bts eax, 8
     wrmsr
 
-    ; 打开分页机制
+    ; 打开保护模式和分页机制
     mov eax, cr0
     bts eax, 0
     bts eax, 31

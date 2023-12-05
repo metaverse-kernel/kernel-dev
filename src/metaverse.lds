@@ -18,10 +18,10 @@ SECTIONS {
         *(.cpumeta)
     }
     . = 4M;
-    .bss :
+    ..kstack :
     {
         kstack = .;
-        *(.bss)
+        *(.kstack)
     }
     . = 16M;
     .text :

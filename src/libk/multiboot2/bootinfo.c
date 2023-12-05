@@ -7,6 +7,15 @@ typedef struct __bootinfo_next_result_t
     void *addr;
 } bootinfo_next_result_t;
 
+u32 mbi_record[32];
+u32 mbirc = 0;
+
+/**
+ * @brief
+ * 
+ * @param bootinfo 
+ * @param result 
+ */
 void bootinfo_next(bootinfo_t *bootinfo, bootinfo_next_result_t *result)
 {
     if (bootinfo->iter_index >= bootinfo->size)
@@ -34,6 +43,7 @@ void bootinfo_new(bootinfo_t *bootinfo, void *bootinfo_addr)
     memset(bootinfo->map_counts, 0, sizeof(bootinfo->map_counts));
     while ((bootinfo_next(bootinfo, &res), res.type))
     {
+        mbi_record[mbirc++] = res.type;
         if (res.type == BOOTINFO_EFI_BOOTSERVICE_NOT_TERMINATED_TYPE)
         {
             bootinfo->map_counts[res.type] = true;
