@@ -1,8 +1,9 @@
 TARGET = ../src/metaverse.elf
+ARCH := $(shell uname -m)
 
 .PHONY: run debug load mount unmount
 
-BIOS = bios/OVMF_CODE.fd
+BIOS = bios/${ARCH}.uefi
 
 run:
 	@sudo modprobe nbd
