@@ -1,6 +1,5 @@
-/target
 /.vscode
-/qemu/metaverse.img
+/test/metaverse.img
 *.o
 *.map
 *.elf
