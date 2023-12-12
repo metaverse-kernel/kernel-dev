@@ -2,7 +2,14 @@
 #define KERNEL_H 1
 
 #include <types.h>
-#include <asm/sysctl.h>
+
+#ifdef __x86_64__
+
+#include <kernel/arch/x86_64/kernel.h>
+
+#define ISA_STRING "x86_64"
+
+#endif
 
 #define KERNEL_TODO() \
     while (true)      \

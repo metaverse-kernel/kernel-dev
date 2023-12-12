@@ -44,6 +44,6 @@ libk:
 	@echo -e "\e[33m-------------------------\e[0m"
 
 clear:
-	@make -C kernel clear --no-print-directory
-	@make -C libk clear --no-print-directory
+	@make -C kernel clear --no-print-directory ${DEFINES}
+	@make -C libk clear --no-print-directory ${DEFINES}
 	@-rm metaverse.elf metaverse.map

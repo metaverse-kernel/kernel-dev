@@ -75,7 +75,7 @@ init32:
     jmp 0x8:init64
 
     section .cpumeta align=4096
-
+    global PML4
     ; 分页
     ; 链接器会把这些数据替换掉所以要在代码中重新设置
 PML4:

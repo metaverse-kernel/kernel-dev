@@ -2,6 +2,7 @@
 #define TTY_H
 
 #include <types.h>
+#include <kernel/memm.h>
 
 typedef enum __tty_type
 {
@@ -58,21 +59,23 @@ typedef struct __tty
     tty_typeinfo typeinfo;
     tty_mode mode;
     tty_text_state text;
+
+    allocator_t *allocator;
 } tty;
 
 // tty控制器
-typedef struct __tty_controller
+typedef struct __tty_controller_t
 {
 #define TTY_MAX_NUM 128
     tty *ttys[TTY_MAX_NUM];
     bool map[TTY_MAX_NUM];
-} tty_controller;
+} tty_controller_t;
 
 /**
  * @brief 初始化tty控制器
  *
  */
-void tty_controller_init();
+tty_controller_t *tty_controller_new();
 
 /**
  * @brief 创建tty
@@ -82,7 +85,7 @@ void tty_controller_init();
  * @return tty* 返回tty对象的地址，如果tty数量超过TTY_MAX_NUM返回nullptr，
  *          无论传入的__tty是否是nullptr
  */
-tty *tty_new(tty *__tty, tty_type type, tty_mode mode);
+tty *tty_new(tty_type type, tty_mode mode);
 
 /**
  * @brief 通过tty id获取一个tty

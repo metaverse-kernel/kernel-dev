@@ -26,7 +26,6 @@ SECTIONS {
     . = 16M;
     .text :
     {
-        kmain = .;
         *(.text)
     }
     .data :

@@ -7,12 +7,14 @@ endif
 # C语言环境变量
 
 CC = gcc
-CCFLAGS = -m64 -mcmodel=large -I ../include -fno-stack-protector -fno-exceptions -fno-builtin -nostdinc -nostdlib
+CCFLAGS = -m64 -mcmodel=large -I ../include \
+			-fno-stack-protector -fno-exceptions \
+			-fno-builtin -nostdinc -nostdlib
 ifdef release
 	CCFLAGS := ${CCFLAGS} -O2
 endif
 
-C_OBJS = bootinfo.o
+C_OBJS = bootinfo.o lst.o
 
 ################################
 
@@ -57,11 +59,12 @@ VPATH = multiboot2/ string/
 
 %.o: arch/${ARCH}/%.s
 	@echo -e "\e[1m\e[33m${ASM}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
-	@${ASM} ${ASMFLAGS} -o $@ $< 2>&1 | "${SOURCE}/colorize" "warning:=yellow" "error:=red"
+	@${ASM} ${ASMFLAGS} -o $@ $< 2>&1 | "${SOURCE}/colorize" "warning:=pink" "error:=red"
 
 libk.o: ${OBJS}
 	@echo -e "\e[1m\e[33mld\e[0m \e[1m\e[32mlibk.o\e[0m \e[34m<--\e[0m \e[32m${OBJS}\e[0m"
-	@ld -r ${OBJS} -o libk.o -Map=libk.map 2>&1 | "${SOURCE}/colorize" "warning:=yellow" "error:=red" "ld=lyellow"
+	@ld -r ${OBJS} -o libk.o -Map=libk.map -unresolved-symbols=ignore-all 2>&1 \
+		| "${SOURCE}/colorize" "warning:=pink" "error:=red" "ld=lyellow"
 	@objcopy ${OBJCOPY_FLAGS} libk.o libk.o
 
 .PHONY: all postproc postproc_x86_64

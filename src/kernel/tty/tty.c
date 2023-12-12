@@ -1,24 +1,26 @@
-#include <kernel/kernel.h>
 #include <kernel/tty.h>
+
+#include <kernel/kernel.h>
+
 #include <libk/string.h>
 
-tty_controller tty_ctrler;
+tty_controller_t tty_ctrler;
 
-void tty_controller_init()
+tty_controller_t *tty_controller_new()
 {
     memset(tty_ctrler.ttys, 0, sizeof(tty_ctrler.ttys));
     memset(tty_ctrler.map, 0, sizeof(tty_ctrler.map));
+    return &tty_ctrler;
 }
 
-tty *tty_new(tty *__tty, tty_type type, tty_mode mode)
+tty *tty_new(tty_type type, tty_mode mode)
 {
-    if (__tty == nullptr)
-    { // TODO 实现内存管理功能后实现
-        KERNEL_TODO();
-    }
+    allocator_t *allocator;
+    tty *__tty = memm_allocate(sizeof(tty), 0, &allocator);
     memset(__tty, 0, sizeof(tty));
     __tty->type = type;
     __tty->mode = mode;
+    __tty->allocator = allocator;
     tty *res = nullptr;
     for (usize i = 0; i < TTY_MAX_NUM; ++i)
     {
