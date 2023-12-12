@@ -3,7 +3,7 @@ ARCH := $(shell uname -m)
 
 .PHONY: run debug load mount unmount
 
-BIOS = bios/${ARCH}.uefi
+BIOS = bios/${ARCH}/OVMF_CODE.fd
 
 run:
 	@sudo modprobe nbd
