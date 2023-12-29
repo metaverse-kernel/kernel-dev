@@ -56,8 +56,10 @@ VPATH = memm/ memm/allocator tty/ klog/ arch/${ARCH}
 
 %.32.o: arch/${ARCH}/%.s
 	@echo -e "\e[1m\e[33m${ASM}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
-	@${ASM} ${ASMFLAGS32} -o $@ $< 2>&1 | "${SOURCE}/colorize" "warning:=pink" "error:=red"
-	@objcopy -I elf32-i386 -O elf64-x86-64 $@ $@ 2>&1 | "${SOURCE}/colorize" "warning:=pink" "error:=red" "objcopy=lyellow"
+	@${ASM} ${ASMFLAGS32} -o $@ $< 2>&1 \
+		| "${SOURCE}/colorize" "warning:=pink" "error:=red"
+	@objcopy -I elf32-i386 -O elf64-x86-64 $@ $@ 2>&1 \
+		| "${SOURCE}/colorize" "warning:=pink" "error:=red" "objcopy=lyellow"
 
 %.o: arch/${ARCH}/%.s
 	@echo -e "\e[1m\e[33m${ASM}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"

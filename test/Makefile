@@ -6,45 +6,45 @@ ARCH := $(shell uname -m)
 BIOS = bios/${ARCH}/OVMF_CODE.fd
 
 run:
-	@sudo modprobe nbd
+	@doas modprobe nbd
 	@make load
-	@qemu-system-x86_64 -m 4G metaverse.img -bios ${BIOS}
+	@qemu-system-${ARCH} -m 4G metaverse.img -bios ${BIOS}
 
 debug:
 	@echo "在gdb中连接远程目标'localhost:1234'即可"
-	@sudo modprobe nbd
+	@doas modprobe nbd
 	@make load
-	@qemu-system-x86_64 -m 4G metaverse.img -bios ${BIOS} -s -S
+	@qemu-system-${ARCH} -m 4G metaverse.img -bios ${BIOS} -s -S
 
 create:
 	@qemu-img create -f qcow2 metaverse.img 512M
-	@sudo modprobe nbd
-	@sudo qemu-nbd --connect=/dev/nbd0 metaverse.img
-	@sudo partprobe /dev/nbd0
+	@doas modprobe nbd
+	@doas qemu-nbd --connect=/dev/nbd0 metaverse.img
+	@doas partprobe /dev/nbd0
 	@echo "你需要为这个虚拟磁盘写入一个GPT分区表并分出efi分区和根分区。"
-	@sudo fdisk /dev/nbd0
-	@sudo mkfs.fat -F 32 /dev/nbd0p1
-	@sudo mkfs.fat -F 32 /dev/nbd0p2
-	@sudo mount /dev/nbd0p2 mnt/
-	@sudo mount -m /dev/nbd0p1 mnt/boot/
-	@sudo mkdir mnt/boot/EFI/
+	@doas fdisk /dev/nbd0
+	@doas mkfs.fat -F 32 /dev/nbd0p1
+	@doas mkfs.fat -F 32 /dev/nbd0p2
+	@doas mount /dev/nbd0p2 mnt/
+	@doas mount -m /dev/nbd0p1 mnt/boot/
+	@doas mkdir mnt/boot/EFI/
 	@make unmount
 
 load:
 	@echo loading kernel ...
 	@make mount
-	@sudo cp ${TARGET} mnt/boot/
+	@doas cp ${TARGET} mnt/boot/
 	@make unmount
 
 mount:
-	@sudo modprobe nbd
-	@sudo qemu-nbd --connect=/dev/nbd0 metaverse.img
-	@sudo partprobe /dev/nbd0
-	@sudo mount /dev/nbd0p2 mnt/
-	@sudo mount /dev/nbd0p1 mnt/boot/
+	@doas modprobe nbd
+	@doas qemu-nbd --connect=/dev/nbd0 metaverse.img
+	@doas partprobe /dev/nbd0
+	@doas mount /dev/nbd0p2 mnt/
+	@doas mount /dev/nbd0p1 mnt/boot/
 
 unmount:
 	@sync
-	@sudo umount /dev/nbd0p1
-	@sudo umount /dev/nbd0p2
-	@sudo qemu-nbd --disconnect /dev/nbd0
+	@doas umount /dev/nbd0p1
+	@doas umount /dev/nbd0p2
+	@doas qemu-nbd --disconnect /dev/nbd0
