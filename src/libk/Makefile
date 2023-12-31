@@ -14,7 +14,8 @@ ifdef release
 	CCFLAGS := ${CCFLAGS} -O2
 endif
 
-C_OBJS = bootinfo.o lst.o
+C_SRCS = bootinfo.c lst.c
+C_OBJS = ${C_SRCS:.c=.c.o}
 
 ################################
 
@@ -23,7 +24,8 @@ C_OBJS = bootinfo.o lst.o
 
 RSCFLAGS = --emit=obj --target x86_64-unknown-linux-gnu --crate-type=bin
 
-RS_OBJS =
+RS_SRCS =
+RS_OBJS = ${RS_SRCS:.rs=.rs.o}
 
 ################################
 
@@ -36,7 +38,8 @@ endif
 
 ASMFLAGS := ${ASMFLAGS}
 
-S_OBJS = memset.o memcpy.o
+S_SRCS = memset.s memcpy.s
+S_OBJS = ${S_SRCS:.s=.s.o}
 
 ################################
 
@@ -49,15 +52,15 @@ OBJCOPY_FLAGS = ${STRIP_SECS}
 # 子目录
 VPATH = multiboot2/ string/
 
-%.o: %.c
+%.c.o: %.c
 	@echo -e "\e[1m\e[33m${CC}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
 	@${CC} -c ${CCFLAGS} $< -o $@
 
-%.o: %.rs
+%.rs.o: %.rs
 	@echo -e "\e[1m\e[33mrustc\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
 	@rustc ${RSCFLAGS} $< -o $@
 
-%.o: arch/${ARCH}/%.s
+%.s.o: arch/${ARCH}/%.s
 	@echo -e "\e[1m\e[33m${ASM}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
 	@${ASM} ${ASMFLAGS} -o $@ $< 2>&1 | "${SOURCE}/colorize" "warning:=pink" "error:=red"
 

@@ -10,7 +10,7 @@ ifdef release
 endif
 
 C_SRCS = main.c tty.c klog.c font.c memm.c memm_${ARCH}.c raw.c
-C_OBJS = ${C_SRCS:.c=.o}
+C_OBJS = ${C_SRCS:.c=.c.o}
 
 ################################
 
@@ -19,7 +19,8 @@ C_OBJS = ${C_SRCS:.c=.o}
 
 RSCFLAGS = --emit=obj --target x86_64-unknown-linux-gnu --crate-type=bin
 
-RS_OBJS =
+RS_SRCS =
+RS_OBJS = ${RS_SRCS:.rs=.rs.o}
 
 ################################
 
@@ -33,7 +34,8 @@ endif
 ASMFLAGS := ${ASMFLAGS}
 ASMFLAGS32 = -f elf32
 
-S_OBJS = entry32.32.o entry.o memm_${ARCH}_s.o
+S_SRCS = entry32.s entry.s memm_${ARCH}_s.s
+S_OBJS = ${S_SRCS:.s=.s.o}
 
 ################################
 
@@ -46,22 +48,22 @@ OBJCOPY_FLAGS = ${STRIP_SECS}
 # 子目录
 VPATH = memm/ memm/allocator tty/ klog/ arch/${ARCH}
 
-%.o: %.c
+%.c.o: %.c
 	@echo -e "\e[1m\e[33m${CC}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
 	@${CC} -c ${CCFLAGS} $< -o $@
 
-%.o: %.rs
+%.rs.o: %.rs
 	@echo -e "\e[1m\e[33mrustc\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
 	@rustc ${RSCFLAGS} $< -o $@
 
-%.32.o: arch/${ARCH}/%.s
+%32.s.o: arch/${ARCH}/%32.s
 	@echo -e "\e[1m\e[33m${ASM}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
 	@${ASM} ${ASMFLAGS32} -o $@ $< 2>&1 \
 		| "${SOURCE}/colorize" "warning:=pink" "error:=red"
 	@objcopy -I elf32-i386 -O elf64-x86-64 $@ $@ 2>&1 \
 		| "${SOURCE}/colorize" "warning:=pink" "error:=red" "objcopy=lyellow"
 
-%.o: arch/${ARCH}/%.s
+%.s.o: arch/${ARCH}/%.s
 	@echo -e "\e[1m\e[33m${ASM}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
 	@${ASM} ${ASMFLAGS} -o $@ $< 2>&1 | "${SOURCE}/colorize" "warning:=pink" "error:=red"
 
