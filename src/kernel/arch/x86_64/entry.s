@@ -21,7 +21,7 @@ multiboot2_header:
     bootinfo_request_tag:
         dd 1
         dd bootinfo_request_tag_end - bootinfo_request_tag
-        dd 4    ; basic mamory info
+        dd 6    ; memory map
         dd 1    ; boot command line
         dd 8    ; framebuffer info
         dd 12   ; efi64 system table pointer

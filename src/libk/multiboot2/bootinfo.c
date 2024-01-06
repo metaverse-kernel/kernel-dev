@@ -48,7 +48,7 @@ void bootinfo_new(bootinfo_t *bootinfo, void *bootinfo_addr)
         {
             bootinfo->map_counts[res.type] = true;
         }
-        else if (res.addr && bootinfo->map_counts[res.type] < 16)
+        else if (res.addr != nullptr && bootinfo->map_counts[res.type] < 16)
         { // 同类型tag数量只能16个以内
             bootinfo->map[res.type][bootinfo->map_counts[res.type]++] = res.addr;
         }

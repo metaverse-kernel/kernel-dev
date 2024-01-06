@@ -13,45 +13,36 @@ void raw_allocator_new(raw_allocator_t *allocator, usize size)
 
 void *raw_allocator_allocate(raw_allocator_t *allocator, usize size, usize align)
 {
-    // 搜索
+    usize rsize = size;
+    align_to(rsize, 16);
     raw_allocator_cell *cell = allocator->cells;
-    while ((void *)cell < (void *)allocator + allocator->size &&
-           cell->length != 0 && cell->capacity >= size)
+    while ((void *)cell + cell->capacity + sizeof(raw_allocator_cell) < (void *)allocator + allocator->size)
     {
-        cell = (void *)cell + sizeof(raw_allocator_cell) + cell->capacity;
+        while (
+            (void *)cell + cell->capacity + sizeof(raw_allocator_cell) < (void *)allocator + allocator->size &&
+            cell->length != 0)
+        {
+            cell = (void *)cell + cell->capacity + sizeof(raw_allocator_cell);
+        }
+        if (rsize <= cell->capacity)
+            break;
     }
-    if ((void *)cell >= (void *)allocator + allocator->size)
+    if ((void *)cell < (void *)allocator + allocator->size)
+        goto fitable_cell_finded;
+    else
         return nullptr;
 
-    // 合并
-    raw_allocator_cell *next_cell = (void *)cell + sizeof(raw_allocator_cell) + cell->capacity;
-    while ((void *)next_cell < (void *)allocator + allocator->size &&
-           next_cell->length == 0)
-    {
-        cell->capacity += sizeof(raw_allocator_cell) + next_cell->capacity;
-        next_cell = (void *)next_cell + sizeof(raw_allocator_cell) + next_cell->capacity;
-    }
-
-    // 分割
-    usize allsize = sizeof(raw_allocator_cell) + size;
-    align_to(allsize, 16);
-    next_cell = (void *)cell + allsize;
-    if (allsize + sizeof(raw_allocator_cell) < sizeof(raw_allocator_cell) + cell->capacity)
-    {
-        usize nextsize = sizeof(raw_allocator_cell) + cell->capacity - allsize;
-        next_cell->capacity = nextsize - sizeof(raw_allocator_cell);
-        next_cell->length = 0;
-    }
-    else
-    {
-        allsize += 16;
-    }
-
-    // 分配
-    cell->capacity = allsize - sizeof(raw_allocator_cell);
+fitable_cell_finded:
     cell->length = size;
-
-    return &cell->content;
+    if (rsize < cell->capacity)
+    {
+        usize cap = cell->capacity;
+        cell->capacity = rsize;
+        raw_allocator_cell *ncell = (void *)cell + cell->capacity + sizeof(raw_allocator_cell);
+        ncell->capacity = cap - rsize - sizeof(raw_allocator_cell);
+        ncell->length = 0;
+    }
+    return cell->content;
 }
 
 void raw_allocator_free(raw_allocator_t *allocator, void *mem)

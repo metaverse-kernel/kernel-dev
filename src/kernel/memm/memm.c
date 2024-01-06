@@ -12,10 +12,10 @@ mem_manager_t *memm_new(usize mem_size)
     memset(&memory_manager, 0, sizeof(memory_manager));
     memory_manager.memory_size = mem_size;
     memory_manager.page_amount = mem_size / MEMM_PAGE_SIZE;
+    memory_manager.alloc_only_memory = MEMM_ALLOC_ONLY_MEMORY;
 
     usize kernel_initial_size = (usize)&kend;
     align_to(kernel_initial_size, MEMM_PAGE_SIZE);
-    memory_manager.alloc_only_memory = MEMM_ALLOC_ONLY_MEMORY;
 
     // 配置分配器树
     allocator_t *allocator0 = memm_allocator_new(
@@ -29,6 +29,7 @@ mem_manager_t *memm_new(usize mem_size)
     alcatr_ind->allocator = allocator0;
     alcatr_ind->left = nullptr;
     alcatr_ind->right = nullptr;
+    alcatr_ind->owned_allocator = allocator0;
 
     memory_manager.allocators = alcatr_ind;
 
@@ -81,8 +82,8 @@ allocator_t *memm_allocator_new(void *start, usize length, usize type, usize pid
     {
     case MEMM_RAW_ALLOCATOR:
         raw_allocator_new((void *)allocator->allocator_instance, length - sizeof(allocator_t));
-        allocator->allocate = &raw_allocator_allocate;
-        allocator->free = &raw_allocator_free;
+        allocator->allocate = raw_allocator_allocate;
+        allocator->free = raw_allocator_free;
         break;
     default:
         allocator->initialized = false;
@@ -171,16 +172,17 @@ void *memm_allocate(usize size, usize pid, allocator_t **allocator)
     align_to(size, MEMM_PAGE_SIZE);
     size /= MEMM_PAGE_SIZE;
     usize allocator_start = find_fitable_pages(size);
+    if (allocator_start == 0)
+        return nullptr; // 内存中已经没有可分配的页了
     for (usize i = allocator_start; i < allocator_start + size; i++)
     {
         bitmap_set(memory_manager.map_with_allocator, i);
     }
-    if (allocator_start == 0)
-        return nullptr; // 内存中已经没有可分配的页了
-    memm_map_pageframes_to(allocator_start * MEMM_PAGE_SIZE, allocator_start * MEMM_PAGE_SIZE,
-                           size * MEMM_PAGE_SIZE,
-                           false, // 用户空间标志
-                           true   // 写权限
+    memm_map_pageframes_to(
+        allocator_start * MEMM_PAGE_SIZE, allocator_start * MEMM_PAGE_SIZE,
+        size * MEMM_PAGE_SIZE,
+        false, // 用户空间标志
+        true   // 写权限
     );
 
     // 在新映射的页中创建一个分配器

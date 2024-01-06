@@ -134,7 +134,7 @@ typedef struct __bootinfo_elf_symbols_t
  * will increment this field. Future version are guranteed to be backward compatible with
  * older format. Each entry has the following structure: bootinfo_memory_map_entry.
  *
- * ‘size’ contains the size of current entry including this field itself. It may be bigger
+ * 'size' contains the size of current entry including this field itself. It may be bigger
  * than 24 bytes in future versions but is guaranteed to be ‘base_addr’ is the starting
  * physical address.
  * ‘length’ is the size of the memory region in bytes.
@@ -158,7 +158,7 @@ typedef struct __bootinfo_memory_map_t
     u32 size;
     u32 entry_size;
     u32 entry_version;
-    struct bootinfo_memory_map_entry_t
+    struct __bootinfo_memory_map_entry_t
     {
         u64 base_addr;
         u64 length;
@@ -167,7 +167,9 @@ typedef struct __bootinfo_memory_map_t
     } DISALIGNED entries[0];
 } DISALIGNED bootinfo_memory_map_t;
 #define bootinfo_memory_map(addr) (bootinfo_memory_map_t *)((usize)(addr) - sizeof(u32))
+#define bootinfo_memory_map_end(addr) ((void *)(addr) + (addr)->size - sizeof(u32))
 #define BOOTINFO_MEMORY_MAP_TYPE 6
+typedef struct __bootinfo_memory_map_entry_t bootinfo_memory_map_entry_t;
 
 /** Boot loader name
  * ‘string’ contains the name of a boot loader booting the kernel. The name is a normal
