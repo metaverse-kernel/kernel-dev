@@ -38,7 +38,7 @@ endif
 
 ASMFLAGS := ${ASMFLAGS}
 
-S_SRCS = memset.s memcpy.s
+S_SRCS = memset.s memcpy.s strlen.s
 S_OBJS = ${S_SRCS:.s=.s.o}
 
 ################################

@@ -3,6 +3,7 @@
 #include <kernel/kernel.h>
 
 #include <libk/string.h>
+#include <libk/string.h>
 
 tty_controller_t tty_ctrler;
 
@@ -125,7 +126,7 @@ inline static void newline(tty *ttyx)
     }
 }
 
-void tty_text_print(tty *ttyx, char *restrict string, u32 color, u32 bgcolor)
+void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
 {
     if (ttyx->mode != tty_mode_text)
         return;
@@ -142,7 +143,8 @@ void tty_text_print(tty *ttyx, char *restrict string, u32 color, u32 bgcolor)
         }
     }
     simple_lock_lock(ttyx->text.lock);
-    while (*string != '\0')
+    usize len = strlen(string);
+    for (char *str = string; string - str < len; string++)
     {
         char c = *string;
         if (c == '\n')
@@ -200,7 +202,6 @@ void tty_text_print(tty *ttyx, char *restrict string, u32 color, u32 bgcolor)
         }
         putchar(ttyx, c, color, bgcolor);
         ttyx->text.column++;
-        ++string;
     }
     if (ttyx->text.column == ttyx->text.width)
         newline(ttyx);

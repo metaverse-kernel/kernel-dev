@@ -40,7 +40,6 @@ void kmain(void *mb2_bootinfo)
 
     framebuffer fb;
     get_frame_buffer_with_bootinfo(&fb, &bootinfo);
-    KERNEL_TODO();
     tty *tty0 = tty_new(tty_type_raw_framebuffer, tty_mode_text);
     tty_set_framebuffer(tty0, &fb);
 
@@ -66,9 +65,9 @@ void get_frame_buffer_with_bootinfo(framebuffer *fb, bootinfo_t *bootinfo)
     fb->width = fbinfo->framebuffer_width;
     fb->height = fbinfo->framebuffer_height;
     fb->pixsize = fbinfo->framebuffer_bpp / 8;
-    memm_map_pageframes_to( // TODO 总共需要映射8MB空间，但是它只映射了2MB
+    fb->pixtype = rgb;
+    memm_map_pageframes_to(
         (u64)fb->pointer, (u64)fb->pointer,
         fb->width * fb->height * fb->pixsize,
         false, true);
-    KERNEL_TODO();
 }
