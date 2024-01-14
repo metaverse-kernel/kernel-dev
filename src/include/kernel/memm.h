@@ -23,6 +23,9 @@
 /* 只分配不映射空间 */
 #define MEMM_ALLOC_ONLY_MEMORY (128 * 1024 * 1024)
 
+typedef void *(*memm_allocate_t)(void *allocator, usize size, usize align);
+typedef void (*memm_free_t)(void *allocator, void *mem);
+
 /*
 内存分配器
 分配器对象的首地址永远是MEMM_PAGE_SIZE对齐的
@@ -45,11 +48,11 @@ typedef struct __allocator_t
     // 无法分配空间返回nullptr
     // 在size参数为0时，保证不可以分配空间，但是如果空间已满依然返回nullptr
     // 当参数align=0时表示不需要对齐
-    void *(*allocate)(void *allocator, usize size, usize align);
+    memm_allocate_t allocate;
 
     // 分配器实例的free函数
     // 若不是allocate得到的地址则什么都不做
-    void (*free)(void *allocator, void *mem);
+    memm_free_t free;
 
     // 分配器实例
     // 对应`type`类型使用

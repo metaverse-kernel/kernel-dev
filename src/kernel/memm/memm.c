@@ -82,8 +82,8 @@ allocator_t *memm_allocator_new(void *start, usize length, usize type, usize pid
     {
     case MEMM_RAW_ALLOCATOR:
         raw_allocator_new((void *)allocator->allocator_instance, length - sizeof(allocator_t));
-        allocator->allocate = raw_allocator_allocate;
-        allocator->free = raw_allocator_free;
+        allocator->allocate = (memm_allocate_t)raw_allocator_allocate;
+        allocator->free = (memm_free_t)raw_allocator_free;
         break;
     default:
         allocator->initialized = false;
