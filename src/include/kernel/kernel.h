@@ -7,7 +7,7 @@
 
 #include <kernel/arch/x86_64/kernel.h>
 
-#define ISA_STRING "x86_64"
+#define ISA_NAME "x86_64"
 
 #endif
 

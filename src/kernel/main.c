@@ -65,7 +65,7 @@ void get_frame_buffer_with_bootinfo(framebuffer *fb, bootinfo_t *bootinfo)
     fb->width = fbinfo->framebuffer_width;
     fb->height = fbinfo->framebuffer_height;
     fb->pixsize = fbinfo->framebuffer_bpp / 8;
-    fb->pixtype = rgb;
+    fb->pixtype = rgb; // 绝大多数显示器配置都是rgb，不需要特意判断
     memm_map_pageframes_to(
         (u64)fb->pointer, (u64)fb->pointer,
         fb->width * fb->height * fb->pixsize,
