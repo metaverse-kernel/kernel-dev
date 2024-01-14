@@ -50,8 +50,8 @@ void tty_set_framebuffer(tty *ttyx, framebuffer *fb)
     memcpy(&ttyx->typeinfo.raw_framebuffer, fb, sizeof(framebuffer));
     if (ttyx->mode == tty_mode_text)
     {
-        ttyx->text.width = fb->width / font_width;
-        ttyx->text.height = fb->height / font_height;
+        ttyx->text.width = fb->width / tty_get_font()->char_width;
+        ttyx->text.height = fb->height / tty_get_font()->char_height;
     }
 }
 
@@ -72,11 +72,12 @@ inline static void scroll_buffer(
 inline static void putchar(
     tty *ttyx, char c, u32 color, u32 bgcolor)
 {
-    for (usize j = 0; j < font_height; ++j)
+    tty_font_t *font = tty_get_font();
+    for (usize j = 0; j < font->char_height; ++j)
     {
-        for (usize i = 0; i < font_width; ++i)
+        for (usize i = 0; i < font->char_width; ++i)
         {
-            bool p = font[c][j] & (1 << (font_width - 1 - i));
+            bool p = font->font[c][j] & (1 << (font->char_width - 1 - i));
             if (p != false)
             {
                 for (usize a = 0; a < TTY_FONT_SCALE; ++a)
@@ -86,8 +87,8 @@ inline static void putchar(
                         put_pixel(ttyx->typeinfo.raw_framebuffer.pointer,
                                   ttyx->typeinfo.raw_framebuffer.width,
                                   ttyx->typeinfo.raw_framebuffer.pixsize,
-                                  ttyx->text.column * font_width * TTY_FONT_SCALE + i * TTY_FONT_SCALE + a,
-                                  ttyx->text.line * font_height * TTY_FONT_SCALE + j * TTY_FONT_SCALE + b,
+                                  ttyx->text.column * font->char_width * TTY_FONT_SCALE + i * TTY_FONT_SCALE + a,
+                                  ttyx->text.line * font->char_height * TTY_FONT_SCALE + j * TTY_FONT_SCALE + b,
                                   color);
                     }
                 }
@@ -101,8 +102,8 @@ inline static void putchar(
                         put_pixel(ttyx->typeinfo.raw_framebuffer.pointer,
                                   ttyx->typeinfo.raw_framebuffer.width,
                                   ttyx->typeinfo.raw_framebuffer.pixsize,
-                                  ttyx->text.column * font_width * TTY_FONT_SCALE + i * TTY_FONT_SCALE + a,
-                                  ttyx->text.line * font_height * TTY_FONT_SCALE + j * TTY_FONT_SCALE + b,
+                                  ttyx->text.column * font->char_width * TTY_FONT_SCALE + i * TTY_FONT_SCALE + a,
+                                  ttyx->text.line * font->char_height * TTY_FONT_SCALE + j * TTY_FONT_SCALE + b,
                                   bgcolor);
                     }
                 }
@@ -121,7 +122,7 @@ inline static void newline(tty *ttyx)
                       ttyx->typeinfo.raw_framebuffer.width,
                       ttyx->typeinfo.raw_framebuffer.height,
                       ttyx->typeinfo.raw_framebuffer.pixsize,
-                      font_height * TTY_FONT_SCALE);
+                      tty_get_font()->char_height * TTY_FONT_SCALE);
         ttyx->text.line--;
     }
 }
@@ -142,6 +143,7 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
             t >>= 8;
         }
     }
+    tty_font_t *font = tty_get_font();
     simple_lock_lock(ttyx->text.lock);
     usize len = strlen(string);
     for (char *str = string; string - str < len; string++)
@@ -172,7 +174,7 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
                               ttyx->typeinfo.raw_framebuffer.width,
                               ttyx->typeinfo.raw_framebuffer.height,
                               ttyx->typeinfo.raw_framebuffer.pixsize,
-                              font_height * TTY_FONT_SCALE);
+                              font->char_height * TTY_FONT_SCALE);
                 ttyx->text.line--;
             }
             continue;
@@ -191,7 +193,7 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
                           ttyx->typeinfo.raw_framebuffer.width,
                           ttyx->typeinfo.raw_framebuffer.height,
                           ttyx->typeinfo.raw_framebuffer.pixsize,
-                          font_height * TTY_FONT_SCALE);
+                          font->char_height * TTY_FONT_SCALE);
             continue;
         }
         // 打印字符c

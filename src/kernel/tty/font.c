@@ -1,6 +1,8 @@
 #include <types.h>
 
-usize font_width = 8, font_height = 16;
+#include <kernel/tty.h>
+
+u16 font_width = 8, font_height = 16;
 
 u64 font[256][64] = {
     // 带 ‘//' 的是基准线
@@ -1880,3 +1882,25 @@ u64 font[256][64] = {
         0b00000000,
     },
 };
+
+bool initialized = false;
+
+u64 *font_pointers[256];
+tty_font_t refont = {
+    .font = (u64 **)font_pointers,
+    .char_width = 8,
+    .char_height = 16,
+};
+
+tty_font_t *tty_get_font()
+{
+    if (initialized == false)
+    {
+        for (usize i = 0; i < 256; i++)
+        {
+            font_pointers[i] = font[i];
+        }
+        initialized = true;
+    }
+    return &refont;
+}
