@@ -113,8 +113,14 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor);
 
 #define gen_color(r, g, b) (((b) << 16) | ((g) << 8) | (r))
 
-#define TTY_FONT_SCALE 2
-extern u64 font[256][64];
-extern usize font_width, font_height;
+#define TTY_FONT_SCALE 1
+
+typedef struct __tty_font_t
+{
+    u16 char_width, char_height;
+    u64 **font;
+} tty_font_t;
+
+tty_font_t tty_get_font();
 
 #endif

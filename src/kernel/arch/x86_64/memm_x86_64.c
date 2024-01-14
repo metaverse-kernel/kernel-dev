@@ -123,8 +123,8 @@ bool memm_map_pageframes_to(
         }
 
         map_pageframe_to(target, physical, user, write, align);
-        usize step = min(size, (usize)align * MEMM_PAGE_SIZE);
 
+        usize step = min(size, (usize)align * MEMM_PAGE_SIZE);
         size -= step;
         target += step;
         physical += step;
