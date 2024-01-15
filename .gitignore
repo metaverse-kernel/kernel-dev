@@ -5,3 +5,4 @@
 *.elf
 metaverse_kernel
 kerndisass.txt
+/build
