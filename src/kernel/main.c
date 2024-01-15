@@ -43,7 +43,9 @@ void kmain(void *mb2_bootinfo)
     tty *tty0 = tty_new(tty_type_raw_framebuffer, tty_mode_text);
     tty_set_framebuffer(tty0, &fb);
 
-    tty_text_print(tty0, "Hello Metaverse!\n", gen_color(0xee, 0xee, 0xee), gen_color(0, 0, 0));
+    tty_text_print(tty0, "Hello ", gen_color(0xee, 0xee, 0xee), gen_color(0, 0, 0));
+    tty_text_print(tty0, "Metaverse", gen_color(0x0a, 0xee, 0x0a), gen_color(0, 0, 0));
+    tty_text_print(tty0, "!\n", gen_color(0xee, 0xee, 0xee), gen_color(0, 0, 0));
 
     // 初始化内核日志模块
 
