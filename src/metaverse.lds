@@ -40,6 +40,10 @@ SECTIONS {
     {
         *(.bss)
     }
+    .comment :
+    {
+        *(.comment)
+    }
     .eh_frame :
     {
         *(.eh_frame)

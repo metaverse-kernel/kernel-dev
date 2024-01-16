@@ -34,7 +34,7 @@ softwares = {
     "doas": ["doas"],
     "gcc": ["gcc"],
     "nasm": ["nasm"],
-    "rust": ["rustc", "rustdoc", "rust-lldb"],
+    "rust": ["rustup", "rustc", "rustdoc", "rust-lldb"],
     "qemu": ["qemu-img", "qemu-nbd", "qemu-system-"+arch],
 }
 

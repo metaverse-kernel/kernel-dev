@@ -19,7 +19,8 @@ C_OBJS = ${C_SRCS:.c=.c.o}
 ################################
 # rust语音环境变量
 
-RSCFLAGS = --emit obj --crate-type lib -L crate="${PWD}/src/"
+RSCFLAGS = --emit obj --crate-type lib \
+	-L crate="~/.rustup/toolchains/stable-${ARCH}-unknown-linux-gnu/lib/rustlib/src/rust/library/"
 
 RS_SRCS =
 RS_OBJS = ${RS_SRCS:.rs=.rs.o}
@@ -42,7 +43,7 @@ S_OBJS = ${S_SRCS:.s=.s.o}
 
 OBJS = ${S_OBJS} ${C_OBJS} ${RS_OBJS}
 
-STRIP_SECS = -R .comment -R .note.GNU-stack
+STRIP_SECS = -R .note.GNU-stack
 
 OBJCOPY_FLAGS = ${STRIP_SECS}
 
