@@ -1,5 +1,6 @@
 ARCH := $(shell uname -m)
-SOURCE := $(shell pwd)/scripts
+PWD := $(shell pwd)
+SOURCE := ${PWD}/scripts
 ifeq (${ARCH},x86_64)
 	ASM = nasm
 	ASMFLAGS = -f elf64
@@ -11,7 +12,7 @@ endif
 
 SUBOBJS = kernel/kernel.o libk/libk.o
 
-DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}"
+DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}"
 ifdef release
 	DEFINES := ${DEFINES} release=1
 endif

@@ -1,13 +1,10 @@
-ARCH := $(shell uname -m)
-ifdef release
-	release = 1
-endif
+.SUFFIXES:
 
 ################################
 # C语言环境变量
 
 CC = gcc
-CCFLAGS = -m64 -mcmodel=large -I ../include \
+CCFLAGS = -m64 -mcmodel=large -I ../../include \
 			-fno-stack-protector -fno-exceptions \
 			-fno-builtin -nostdinc -nostdlib
 ifdef release
@@ -22,7 +19,7 @@ C_OBJS = ${C_SRCS:.c=.c.o}
 ################################
 # rust语音环境变量
 
-RSCFLAGS = --emit=obj --target x86_64-unknown-linux-gnu --crate-type=bin
+RSCFLAGS = --emit obj --crate-type lib -L crate="${PWD}/src/"
 
 RS_SRCS =
 RS_OBJS = ${RS_SRCS:.rs=.rs.o}

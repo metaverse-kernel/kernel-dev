@@ -1,15 +1,17 @@
+.SUFFIXES:
+
 ################################
 # C语言环境变量
 
 CC = gcc
-CCFLAGS = -m64 -mcmodel=large -I ../include \
+CCFLAGS = -m64 -mcmodel=large -I ../../include \
 			-fno-stack-protector -fno-exceptions \
 			-fno-builtin -nostdinc -nostdlib
 ifdef release
 	CCFLAGS := ${CCFLAGS} -O2
 endif
 
-C_SRCS = main.c tty.c klog.c font.c memm.c memm_${ARCH}.c raw.c
+C_SRCS = main.c tty.c font.c memm.c memm_${ARCH}.c raw.c
 C_OBJS = ${C_SRCS:.c=.c.o}
 
 ################################
@@ -17,9 +19,9 @@ C_OBJS = ${C_SRCS:.c=.c.o}
 ################################
 # rust语音环境变量
 
-RSCFLAGS = --emit=obj --target x86_64-unknown-linux-gnu --crate-type=bin
+RSCFLAGS = --emit obj --crate-type lib -L crate="${PWD}/src/"
 
-RS_SRCS =
+RS_SRCS = klog.rs
 RS_OBJS = ${RS_SRCS:.rs=.rs.o}
 
 ################################
@@ -34,7 +36,7 @@ endif
 ASMFLAGS := ${ASMFLAGS}
 ASMFLAGS32 = -f elf32
 
-S_SRCS = entry32.s entry.s memm_${ARCH}_s.s
+S_SRCS = entry32.s entry.s memm_${ARCH}.s
 S_OBJS = ${S_SRCS:.s=.s.o}
 
 ################################
