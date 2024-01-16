@@ -7,11 +7,9 @@
 
 lst_iterator_t *lst_new(usize start, usize end)
 {
-    allocator_t *allocator;
-    lst_iterator_t *lst = memm_allocate(sizeof(lst_iterator_t), 0, &allocator);
+    lst_iterator_t *lst = memm_allocate(sizeof(lst_iterator_t), 0);
     lst->line.left = start;
     lst->line.right = end;
-    lst->allocator = allocator;
     lst->next = nullptr;
     return lst;
 }
@@ -130,9 +128,7 @@ bool lst_add(lst_iterator_t *lst, usize left, usize right, bool force)
                 lst->line.left = left;
             else
             {
-                allocator_t *alloctr;
-                lst_iterator_t *new_node = memm_allocate(sizeof(lst_iterator_t), 0, &alloctr);
-                new_node->allocator = alloctr;
+                lst_iterator_t *new_node = memm_allocate(sizeof(lst_iterator_t), 0);
                 new_node->line = line;
                 new_node->next = lst;
                 if (last != nullptr)
@@ -169,7 +165,7 @@ bool lst_add(lst_iterator_t *lst, usize left, usize right, bool force)
                     }
                     tmplast = *tmpnode;
                     lst_iterator_t *t = lst_next(tmpnode);
-                    memm_free(tmpnode->allocator, tmpnode);
+                    memm_free(tmpnode);
                     tmpnode = t;
                 }
                 lst->line.right = max(tmplast.line.right, right);

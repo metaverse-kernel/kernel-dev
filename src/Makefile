@@ -1,5 +1,6 @@
 ARCH := $(shell uname -m)
-SOURCE := $(shell pwd)/scripts
+PWD := $(shell pwd)
+SOURCE := ${PWD}/scripts
 ifeq (${ARCH},x86_64)
 	ASM = nasm
 	ASMFLAGS = -f elf64
@@ -11,14 +12,27 @@ endif
 
 SUBOBJS = kernel/kernel.o libk/libk.o
 
-DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}"
+DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}"
 ifdef release
 	DEFINES := ${DEFINES} release=1
 endif
 
+RUSTLIB_PATH = ../rustlib/${ARCH}/lib
+RUST_LIBS = "${RUSTLIB_PATH}/libaddr2line.rlib" "${RUSTLIB_PATH}/libadler.rlib" \
+	"${RUSTLIB_PATH}/liballoc.rlib" "${RUSTLIB_PATH}/libcfg_if.rlib" "${RUSTLIB_PATH}/libcompiler_builtins.rlib" \
+	"${RUSTLIB_PATH}/libcore.rlib" "${RUSTLIB_PATH}/libgetopts.rlib" "${RUSTLIB_PATH}/libgimli.rlib" \
+	"${RUSTLIB_PATH}/libhashbrown.rlib" "${RUSTLIB_PATH}/libmemchr.rlib" "${RUSTLIB_PATH}/libminiz_oxide.rlib" \
+	"${RUSTLIB_PATH}/libobject.rlib" "${RUSTLIB_PATH}/libpanic_abort.rlib" "${RUSTLIB_PATH}/libpanic_unwind.rlib" \
+	"${RUSTLIB_PATH}/libproc_macro.rlib" "${RUSTLIB_PATH}/libprofiler_builtins.rlib" \
+	"${RUSTLIB_PATH}/librustc_demangle.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_alloc.rlib" \
+	"${RUSTLIB_PATH}/librustc_std_workspace_core.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_std.rlib" \
+	"${RUSTLIB_PATH}/libstd_detect.rlib" "${RUSTLIB_PATH}/libstd.rlib" "${RUSTLIB_PATH}/libsysroot.rlib" \
+	"${RUSTLIB_PATH}/libtest.rlib" "${RUSTLIB_PATH}/libunicode_width.rlib" "${RUSTLIB_PATH}/libunwind.rlib"
+
 metaverse.elf: kernel libk metaverse.lds
 	@echo -e "\e[1;33mld\e[0m \e[1;32m$@\e[0m \e[34m<--\e[0m \e[32m${SUBOBJS}\e[0m"
-	@ld -T metaverse.lds -Map=metaverse.map -o $@ ${SUBOBJS} 2>&1 | "${SOURCE}/colorize" "warning:=yellow" "error:=red" "ld=lyellow"
+	@ld -T metaverse.lds -Map=metaverse.map -unresolved-symbols=ignore-all -o $@ ${SUBOBJS} ${RUST_LIBS} \
+		2>&1 | "${SOURCE}/colorize" "warning:=yellow" "error:=red" "ld=lyellow"
 
 .PHONY: kernel libk all clear postproc
 

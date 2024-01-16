@@ -47,8 +47,6 @@ void kmain(void *mb2_bootinfo)
     tty_text_print(tty0, "Metaverse", gen_color(0x0a, 0xee, 0x0a), gen_color(0, 0, 0));
     tty_text_print(tty0, "!\n", gen_color(0xee, 0xee, 0xee), gen_color(0, 0, 0));
 
-    // 初始化内核日志模块
-
     while (true)
     {
     }

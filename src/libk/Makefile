@@ -1,13 +1,10 @@
-ARCH := $(shell uname -m)
-ifdef release
-	release = 1
-endif
+.SUFFIXES:
 
 ################################
 # C语言环境变量
 
 CC = gcc
-CCFLAGS = -m64 -mcmodel=large -I ../include \
+CCFLAGS = -m64 -mcmodel=large -I ../../include \
 			-fno-stack-protector -fno-exceptions \
 			-fno-builtin -nostdinc -nostdlib
 ifdef release
@@ -22,7 +19,8 @@ C_OBJS = ${C_SRCS:.c=.c.o}
 ################################
 # rust语音环境变量
 
-RSCFLAGS = --emit=obj --target x86_64-unknown-linux-gnu --crate-type=bin
+RSCFLAGS = --emit obj --crate-type lib \
+	-L crate="~/.rustup/toolchains/stable-${ARCH}-unknown-linux-gnu/lib/rustlib/src/rust/library/"
 
 RS_SRCS =
 RS_OBJS = ${RS_SRCS:.rs=.rs.o}
@@ -45,7 +43,7 @@ S_OBJS = ${S_SRCS:.s=.s.o}
 
 OBJS = ${S_OBJS} ${C_OBJS} ${RS_OBJS}
 
-STRIP_SECS = -R .comment -R .note.GNU-stack
+STRIP_SECS = -R .note.GNU-stack
 
 OBJCOPY_FLAGS = ${STRIP_SECS}
 

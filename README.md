@@ -2,7 +2,11 @@
 
 基于multiboot2引导的64位内核。
 
-## 试用
+## 获取
+
+```bash
+git clone --recursive https://github.com/metaverse-kernel/kernel-dev.git
+```
 
 * 编译
 
@@ -66,4 +70,4 @@ make debug
 
 版权所有 (c) 2023 - 现在 Random World Studio 保留所有权利。
 
-本软件使用MIT开源许可证进行许可。详细信息请参阅许可证文件。
+本软件通过MIT开源许可证开源。详细信息请参阅许可证文件。
