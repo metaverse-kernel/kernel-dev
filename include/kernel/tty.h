@@ -59,8 +59,6 @@ typedef struct __tty
     tty_typeinfo typeinfo;
     tty_mode mode;
     tty_text_state text;
-
-    allocator_t *allocator;
 } tty;
 
 // tty控制器

@@ -64,9 +64,6 @@ typedef struct __allocator_iterator_t
 {
     allocator_t *allocator;
     struct __allocator_iterator_t *left, *right;
-
-    // 这个节点的内存空间处于的那个分配器
-    allocator_t *owned_allocator;
 } allocator_iterator_t;
 
 /*
@@ -137,13 +134,19 @@ pid=0时为内核分配
 所有内存在内核空间都有对物理内存空间的直接映射，也就是线性地址与物理地址相同，称为内核地址
 
 allocator对象在进程与内核之间传递时一律使用内核空间的映射地址
+
+## 要求在返回的地址前16字节处保留8字节空间作为它所在的allocator地址，并且不需要分配器的具体实现做这个事
  */
-void *memm_allocate(usize size, usize pid, allocator_t **allocator);
+void *memm_allocate(usize size, usize pid);
+#define memm_addr_set_allocator(mem, allocator) \
+    *(allocator_t **)(mem - 16) = allocator;
+#define memm_addr_get_allocator(mem) \
+    ((*(allocator_t **)(mem - 16)))
 
 /*
 释放内存
  */
-void memm_free(allocator_t *allocator, void *mem);
+void memm_free(void *mem);
 
 /*
 寻找大小合适的一组页

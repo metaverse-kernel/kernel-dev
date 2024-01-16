@@ -16,10 +16,6 @@ typedef struct __lst_line_t
 typedef struct __lst_iterator_t
 {
     lst_line_t line;
-    // 这个指针是kernel/memm.h中的allocator_t *
-    // 代表当前lst_line_index_t对象在allocate时使用的allocator
-    // 用的话会造成递归include
-    void *allocator;
     struct __lst_iterator_t *next;
 } lst_iterator_t;
 

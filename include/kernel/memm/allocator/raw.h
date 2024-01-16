@@ -2,13 +2,16 @@
 #define RAW_H 1
 
 #include <types.h>
+#include <kernel/memm.h>
 
 #define MEMM_RAW_ALLOCATOR 1
 
 typedef struct __raw_allocator_cell
 {
-    usize capacity; // 是content的长度
-    usize length;   // 是实际使用的长度
+    usize capacity;         // 是content的长度
+    usize length;           // 是实际使用的长度
+    allocator_t *allocator; // 所在的分配器
+    usize reserved;
     u8 content[0];
 } raw_allocator_cell;
 #define raw_allocator_next_cell(cell) (raw_allocator_cell *)((void *)((cell)->content) + (cell)->capacity)

@@ -16,12 +16,10 @@ tty_controller_t *tty_controller_new()
 
 tty *tty_new(tty_type type, tty_mode mode)
 {
-    allocator_t *allocator;
-    tty *__tty = memm_allocate(sizeof(tty), 0, &allocator);
+    tty *__tty = memm_allocate(sizeof(tty), 0);
     memset(__tty, 0, sizeof(tty));
     __tty->type = type;
     __tty->mode = mode;
-    __tty->allocator = allocator;
     tty *res = nullptr;
     for (usize i = 0; i < TTY_MAX_NUM; ++i)
     {

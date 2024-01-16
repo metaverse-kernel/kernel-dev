@@ -29,7 +29,6 @@ mem_manager_t *memm_new(usize mem_size)
     alcatr_ind->allocator = allocator0;
     alcatr_ind->left = nullptr;
     alcatr_ind->right = nullptr;
-    alcatr_ind->owned_allocator = allocator0;
 
     memory_manager.allocators = alcatr_ind;
 
@@ -159,11 +158,12 @@ static void insert_allocator(allocator_iterator_t *iter, allocator_iterator_t *i
     }
 }
 
-void *memm_allocate(usize size, usize pid, allocator_t **allocator)
+void *memm_allocate(usize size, usize pid)
 {
     usize orgsize = size;
     // 从分配器树中分配内存
-    void *ptr = memm_find_and_allocate(memory_manager.allocators, size, pid, allocator);
+    allocator_t *allocator;
+    void *ptr = memm_find_and_allocate(memory_manager.allocators, size, pid, &allocator);
     if (ptr != nullptr)
         goto after_allocation;
 
@@ -190,11 +190,9 @@ void *memm_allocate(usize size, usize pid, allocator_t **allocator)
     allocator_t *new_allocator =
         memm_allocator_new((void *)(allocator_start * MEMM_PAGE_SIZE), size * MEMM_PAGE_SIZE,
                            MEMM_RAW_ALLOCATOR, pid);
-    *allocator = new_allocator;
+    allocator = new_allocator;
 
-    allocator_t *all;
-    allocator_iterator_t *allind = memm_allocate(sizeof(allocator_iterator_t), 0, &all);
-    allind->owned_allocator = all;
+    allocator_iterator_t *allind = memm_allocate(sizeof(allocator_iterator_t), 0);
     allind->allocator = new_allocator;
     allind->left = nullptr;
     allind->right = nullptr;
@@ -202,6 +200,7 @@ void *memm_allocate(usize size, usize pid, allocator_t **allocator)
     ptr = new_allocator->allocate(&new_allocator->allocator_instance, orgsize, 0);
 
 after_allocation:
+    memm_addr_set_allocator(ptr, allocator);
     if (pid != 0)
     { // TODO 进程管理中应该有一个用户地址-内核地址映射表
       // 在进程分配时将页映射到用户空间中，并将这个映射关系记录进这个表中
@@ -210,8 +209,9 @@ after_allocation:
     return ptr;
 }
 
-void memm_free(allocator_t *allocator, void *mem)
+void memm_free(void *mem)
 {
+    allocator_t *allocator = memm_addr_get_allocator(mem);
     if (is_user_address((u64)mem))
     { // TODO 对于用户空间的地址需要先转换到内核地址后释放
     }
