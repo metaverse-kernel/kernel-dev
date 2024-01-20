@@ -1,4 +1,6 @@
-# Metaverse内核
+# Metaverse
+
+![logo](https://avatars.githubusercontent.com/u/156706034?s=400&u=d971c0c8990c8c49ff4863e2366ecbebc00cf9ae&v=4)
 
 基于multiboot2引导的64位内核。
 

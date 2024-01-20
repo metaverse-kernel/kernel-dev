@@ -17,17 +17,6 @@ C_OBJS = ${C_SRCS:.c=.c.o}
 ################################
 
 ################################
-# rust语音环境变量
-
-RSCFLAGS = --emit obj --crate-type lib \
-	-L crate="~/.rustup/toolchains/stable-${ARCH}-unknown-linux-gnu/lib/rustlib/src/rust/library/"
-
-RS_SRCS =
-RS_OBJS = ${RS_SRCS:.rs=.rs.o}
-
-################################
-
-################################
 # 汇编语言环境变量
 
 ifndef ASM
@@ -41,7 +30,7 @@ S_OBJS = ${S_SRCS:.s=.s.o}
 
 ################################
 
-OBJS = ${S_OBJS} ${C_OBJS} ${RS_OBJS}
+OBJS = ${S_OBJS} ${C_OBJS}
 
 STRIP_SECS = -R .note.GNU-stack
 
@@ -53,10 +42,6 @@ VPATH = multiboot2/ string/
 %.c.o: %.c
 	@echo -e "\e[1m\e[33m${CC}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
 	@${CC} -c ${CCFLAGS} $< -o $@
-
-%.rs.o: %.rs
-	@echo -e "\e[1m\e[33mrustc\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
-	@rustc ${RSCFLAGS} $< -o $@
 
 %.s.o: arch/${ARCH}/%.s
 	@echo -e "\e[1m\e[33m${ASM}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"

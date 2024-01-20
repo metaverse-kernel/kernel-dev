@@ -1,3 +1,5 @@
+.SUFFIXES:
+
 ARCH := $(shell uname -m)
 PWD := $(shell pwd)
 SOURCE := ${PWD}/scripts
@@ -10,11 +12,25 @@ ifdef release
 	release = 1
 endif
 
-SUBOBJS = kernel/kernel.o libk/libk.o
+SUBOBJS = kernel/kernel.o libk/libk.o rust.o
 
 DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}"
 ifdef release
 	DEFINES := ${DEFINES} release=1
+endif
+
+################################
+# rust语言环境变量
+
+RSCFLAGS = --emit obj --crate-type lib \
+	-L crate="${PWD}/../rustlib/${ARCH}/src/" \
+	-C code-model=large \
+	-C relocation-model=static \
+	-C embed-bitcode=no \
+	-C opt-level=z
+
+ifeq (${ARCH},x86_64)
+	RSCFLAGS := ${RSCFLAGS} -C target-feature=-sse,-avx
 endif
 
 RUSTLIB_PATH = ../rustlib/${ARCH}/lib
@@ -29,12 +45,14 @@ RUST_LIBS = "${RUSTLIB_PATH}/libaddr2line.rlib" "${RUSTLIB_PATH}/libadler.rlib" 
 	"${RUSTLIB_PATH}/libstd_detect.rlib" "${RUSTLIB_PATH}/libstd.rlib" "${RUSTLIB_PATH}/libsysroot.rlib" \
 	"${RUSTLIB_PATH}/libtest.rlib" "${RUSTLIB_PATH}/libunicode_width.rlib" "${RUSTLIB_PATH}/libunwind.rlib"
 
-metaverse.elf: kernel libk metaverse.lds
+################################
+
+metaverse.elf: kernel libk rust metaverse.lds
 	@echo -e "\e[1;33mld\e[0m \e[1;32m$@\e[0m \e[34m<--\e[0m \e[32m${SUBOBJS}\e[0m"
 	@ld -T metaverse.lds -Map=metaverse.map -unresolved-symbols=ignore-all -o $@ ${SUBOBJS} ${RUST_LIBS} \
 		2>&1 | "${SOURCE}/colorize" "warning:=yellow" "error:=red" "ld=lyellow"
 
-.PHONY: kernel libk all clear postproc
+.PHONY: kernel libk all clear postproc rust
 
 all: postproc metaverse.elf
 
@@ -57,7 +75,10 @@ libk:
 	@make -C libk all --no-print-directory ${DEFINES}
 	@echo -e "\e[33m-------------------------\e[0m"
 
+rust:
+	@rustc ${RSCFLAGS} lib.rs -o rust.o
+
 clear:
 	@make -C kernel clear --no-print-directory ${DEFINES}
 	@make -C libk clear --no-print-directory ${DEFINES}
-	@-rm metaverse.elf metaverse.map
+	@-rm metaverse.elf metaverse.map rust.o

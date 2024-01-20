@@ -5,5 +5,7 @@
 *.elf
 metaverse_kernel
 kerndisass.txt
-orgprof
+/orgprof
 /build
+/target
+/sources

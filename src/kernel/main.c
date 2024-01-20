@@ -37,19 +37,15 @@ void kmain(void *mb2_bootinfo)
 
     // 初始化tty模块
     tty_controller_t *tty_controler = tty_controller_new();
-
     framebuffer fb;
     get_frame_buffer_with_bootinfo(&fb, &bootinfo);
     tty *tty0 = tty_new(tty_type_raw_framebuffer, tty_mode_text);
     tty_set_framebuffer(tty0, &fb);
 
-    tty_text_print(tty0, "Hello ", gen_color(0xee, 0xee, 0xee), gen_color(0, 0, 0));
-    tty_text_print(tty0, "Metaverse", gen_color(0x0a, 0xee, 0x0a), gen_color(0, 0, 0));
-    tty_text_print(tty0, "!\n", gen_color(0xee, 0xee, 0xee), gen_color(0, 0, 0));
+    // 为rust准备正确对齐的栈
+    prepare_stack();
 
-    while (true)
-    {
-    }
+    kmain_rust();
 }
 
 void get_frame_buffer_with_bootinfo(framebuffer *fb, bootinfo_t *bootinfo)

@@ -24,6 +24,8 @@
     }
 #define simple_lock_unlock(lock) (lock) = false;
 
+extern void kmain_rust();
+
 extern void *kend; // 内核结束的标记
 
 #endif

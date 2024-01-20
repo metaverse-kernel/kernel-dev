@@ -6,13 +6,13 @@
 
 typedef enum __tty_type
 {
-    invalid,
+    invalid = 0,
     // 用于在内核刚刚被引导，只有bootloader提供的显示功能时使用
-    tty_type_raw_framebuffer,
+    tty_type_raw_framebuffer = 1,
     // 用于图形功能初始化后，直接连接图形接口
-    tty_type_display,
+    tty_type_display = 2,
     // 用于图形终端的终端模拟器
-    tty_type_vtty,
+    tty_type_vtty = 3,
 } tty_type;
 
 typedef enum __framebuffer_pixel_type
@@ -40,8 +40,8 @@ typedef struct __framebuffer framebuffer;
 // 文本模式中的字符由tty模块渲染
 typedef enum __tty_mode
 {
-    tty_mode_text,
-    tty_mode_graphics,
+    tty_mode_text = 0,
+    tty_mode_graphics = 1,
 } tty_mode;
 
 typedef struct __tty_text_state
@@ -92,6 +92,13 @@ tty *tty_new(tty_type type, tty_mode mode);
  * @return tty** 二级指针方便判断这个tty是否删除，返回空指针表示当前没有这个tty
  */
 tty **tty_get(usize id);
+
+/**
+ * @brief 获取tty的id
+ * 
+ * @return usize 
+ */
+usize tty_get_id(tty *__tty);
 
 /**
  * @brief 当type为raw_framebuffer时设置帧缓冲区
