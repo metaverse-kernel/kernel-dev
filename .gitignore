@@ -7,3 +7,5 @@ metaverse_kernel
 kerndisass.txt
 orgprof
 /build
+/target
+/sources
