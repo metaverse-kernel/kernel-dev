@@ -7,7 +7,7 @@
 
 lst_iterator_t *lst_new(usize start, usize end)
 {
-    lst_iterator_t *lst = memm_kernel_allocate(sizeof(lst_iterator_t), 0);
+    lst_iterator_t *lst = memm_kernel_allocate(sizeof(lst_iterator_t));
     lst->line.left = start;
     lst->line.right = end;
     lst->next = nullptr;

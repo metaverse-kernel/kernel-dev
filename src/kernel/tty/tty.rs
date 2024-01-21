@@ -1,20 +1,20 @@
-use std::{
-    io::{BufWriter, Write},
-    ptr::null_mut,
-};
+use std::ptr::null_mut;
 
 extern "C" {
     fn tty_new(tty_type: u8, mode: u8) -> *mut u8;
     fn tty_get(id: usize) -> *mut *mut u8;
     pub fn tty_text_print(ttyx: *mut u8, string: *mut u8, color: u32, bgcolor: u32);
     fn tty_get_id(tty: *mut u8) -> usize;
+
+    fn tty_enable(tty: *mut u8) -> bool;
+    fn tty_disable(tty: *mut u8);
 }
 
 pub enum Type {
     Invalid = 0,
     RawFramebuffer = 1,
     Display = 2,
-    VirtualTty = 3,
+    VirtualTerm = 3,
 }
 
 pub enum Mode {
@@ -50,12 +50,20 @@ impl Tty {
         unsafe { tty_get_id(self.tty_pointer) }
     }
 
+    pub fn enable(&self) {
+        unsafe { tty_enable(self.tty_pointer) };
+    }
+
+    pub fn disable(&self) {
+        unsafe { tty_disable(self.tty_pointer) };
+    }
+
     pub fn print(&self, msg: Message) {
         for MessageSection {
             mut msg,
             fgcolor,
             bgcolor,
-        } in msg.into_iter()
+        } in msg.0.into_iter()
         {
             unsafe {
                 let string = msg.as_bytes_mut() as *mut [u8] as *mut u8;
@@ -89,7 +97,7 @@ pub struct MessageSection {
     bgcolor: Color,
 }
 
-type Message = Vec<MessageSection>;
+pub struct Message(Vec<MessageSection>);
 
 pub struct MessageBuilder {
     msg: Message,
@@ -97,11 +105,13 @@ pub struct MessageBuilder {
 
 impl MessageBuilder {
     pub fn new() -> Self {
-        Self { msg: vec![] }
+        Self {
+            msg: Message(vec![]),
+        }
     }
 
     pub fn message(mut self, msg: String) -> Self {
-        self.msg.push(MessageSection {
+        self.msg.0.push(MessageSection {
             msg,
             fgcolor: Color(0xee, 0xee, 0xee),
             bgcolor: Color(0, 0, 0),
@@ -110,14 +120,14 @@ impl MessageBuilder {
     }
 
     pub fn background_color(mut self, color: Color) -> Self {
-        if let Some(msg) = self.msg.last_mut() {
+        if let Some(msg) = self.msg.0.last_mut() {
             msg.bgcolor = color;
         }
         self
     }
 
     pub fn foreground_color(mut self, color: Color) -> Self {
-        if let Some(msg) = self.msg.last_mut() {
+        if let Some(msg) = self.msg.0.last_mut() {
             msg.fgcolor = color;
         }
         self

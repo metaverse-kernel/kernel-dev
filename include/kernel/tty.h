@@ -12,7 +12,7 @@ typedef enum __tty_type
     // 用于图形功能初始化后，直接连接图形接口
     tty_type_display = 2,
     // 用于图形终端的终端模拟器
-    tty_type_vtty = 3,
+    tty_type_vterm = 3,
 } tty_type;
 
 typedef enum __framebuffer_pixel_type
@@ -58,6 +58,7 @@ typedef struct __tty
     tty_type type;
     tty_typeinfo typeinfo;
     tty_mode mode;
+    bool enabled;
     tty_text_state text;
 } tty;
 
@@ -67,6 +68,7 @@ typedef struct __tty_controller_t
 #define TTY_MAX_NUM 128
     tty *ttys[TTY_MAX_NUM];
     bool map[TTY_MAX_NUM];
+    tty *enabled[TTY_MAX_NUM];
 } tty_controller_t;
 
 /**
@@ -117,6 +119,19 @@ void tty_set_framebuffer(tty *ttyx, framebuffer *fb);
 void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor);
 
 #define gen_color(r, g, b) (((r) << 16) | ((g) << 8) | (b))
+
+/**
+ * @brief 打开某个tty
+ * 
+ * @param ttyx 
+ * @return true 打开成功
+ * @return false 已经打开
+ *  或作为raw_framebuffer类型的tty，framebuffer已被其它raw_framebuffer
+ *  类型的tty占用
+ */
+bool tty_enable(tty *ttyx);
+
+void tty_disable(tty *ttyx);
 
 #define TTY_FONT_SCALE 2
 
