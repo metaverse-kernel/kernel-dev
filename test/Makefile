@@ -8,7 +8,7 @@ BIOS = bios/${ARCH}/OVMF_CODE.fd
 run:
 	@doas modprobe nbd
 	@make load
-	@qemu-system-${ARCH} -m 4G metaverse.img -bios ${BIOS}
+	@qemu-system-${ARCH} -accel kvm -m 4G metaverse.img -bios ${BIOS}
 
 debug:
 	@echo "在gdb中连接远程目标'localhost:1234'即可"

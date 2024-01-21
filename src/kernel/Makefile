@@ -17,17 +17,6 @@ C_OBJS = ${C_SRCS:.c=.c.o}
 ################################
 
 ################################
-# rust语音环境变量
-
-RSCFLAGS = --emit obj --crate-type lib \
-	-L crate="${PWD}/../rustlib/${ARCH}/src/"
-
-RS_SRCS = klog.rs memm.rs
-RS_OBJS = ${RS_SRCS:.rs=.rs.o}
-
-################################
-
-################################
 # 汇编语言环境变量
 
 ifndef ASM
@@ -37,12 +26,12 @@ endif
 ASMFLAGS := ${ASMFLAGS}
 ASMFLAGS32 = -f elf32
 
-S_SRCS = entry32.s entry.s memm_${ARCH}.s
+S_SRCS = entry32.s entry.s memm_${ARCH}.s kernel.s
 S_OBJS = ${S_SRCS:.s=.s.o}
 
 ################################
 
-OBJS = ${S_OBJS} ${C_OBJS} ${RS_OBJS}
+OBJS = ${S_OBJS} ${C_OBJS}
 
 STRIP_SECS = -R .note.GNU-stack
 
@@ -54,10 +43,6 @@ VPATH = memm/ memm/allocator tty/ klog/ arch/${ARCH}
 %.c.o: %.c
 	@echo -e "\e[1m\e[33m${CC}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
 	@${CC} -c ${CCFLAGS} $< -o $@
-
-%.rs.o: %.rs
-	@echo -e "\e[1m\e[33mrustc\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"
-	@rustc ${RSCFLAGS} $< -o $@
 
 %32.s.o: arch/${ARCH}/%32.s
 	@echo -e "\e[1m\e[33m${ASM}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"

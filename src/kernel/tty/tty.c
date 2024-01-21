@@ -41,6 +41,11 @@ tty **tty_get(usize id)
     return &tty_ctrler.ttys[id];
 }
 
+usize tty_get_id(tty *__tty)
+{
+    return __tty->id;
+}
+
 void tty_set_framebuffer(tty *ttyx, framebuffer *fb)
 {
     if (ttyx->type != tty_type_raw_framebuffer)
