@@ -143,6 +143,10 @@ void *memm_allocate(usize size, usize pid);
 #define memm_addr_get_allocator(mem) \
     ((*(allocator_t **)(mem - 16)))
 
+void *memm_kernel_allocate(usize size);
+
+void *memm_user_allocate(usize size, usize pid);
+
 /*
 释放内存
  */
