@@ -1,9 +1,12 @@
-use std::ptr::null_mut;
+use std::{
+    io::{BufWriter, Write},
+    ptr::null_mut,
+};
 
 extern "C" {
     fn tty_new(tty_type: u8, mode: u8) -> *mut u8;
     fn tty_get(id: usize) -> *mut *mut u8;
-    fn tty_text_print(ttyx: *mut u8, string: *mut u8, color: u32, bgcolor: u32);
+    pub fn tty_text_print(ttyx: *mut u8, string: *mut u8, color: u32, bgcolor: u32);
     fn tty_get_id(tty: *mut u8) -> usize;
 }
 
@@ -39,6 +42,10 @@ impl Tty {
         }
     }
 
+    pub unsafe fn get_c_tty_t(&self) -> *mut u8 {
+        self.tty_pointer
+    }
+
     pub fn id(&self) -> usize {
         unsafe { tty_get_id(self.tty_pointer) }
     }
@@ -51,12 +58,17 @@ impl Tty {
         } in msg.into_iter()
         {
             unsafe {
+                let string = msg.as_bytes_mut() as *mut [u8] as *mut u8;
+                let string = string.offset(msg.len() as isize);
+                let swp = *string;
+                *string = 0;
                 tty_text_print(
                     self.tty_pointer,
                     msg.as_bytes_mut() as *mut [u8] as *mut u8,
                     u32::from(fgcolor),
                     u32::from(bgcolor),
-                )
+                );
+                *string = swp;
             };
         }
     }

@@ -76,6 +76,7 @@ libk:
 	@echo -e "\e[33m-------------------------\e[0m"
 
 rust:
+	@echo -e "\e[1m\e[33mrustc\e[0m \e[34m-->\e[0m \e[1m\e[32m$@.o\e[0m"
 	@rustc ${RSCFLAGS} lib.rs -o rust.o
 
 clear:
