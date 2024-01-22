@@ -11,7 +11,7 @@ ifdef release
 	CCFLAGS := ${CCFLAGS} -O2
 endif
 
-C_SRCS = main.c tty.c font.c memm.c memm_${ARCH}.c raw.c
+C_SRCS = main.c tty.c font.c memm.c memm_${ARCH}.c raw.c time.c
 C_OBJS = ${C_SRCS:.c=.c.o}
 
 ################################
@@ -38,7 +38,7 @@ STRIP_SECS = -R .note.GNU-stack
 OBJCOPY_FLAGS = ${STRIP_SECS}
 
 # 子目录
-VPATH = memm/ memm/allocator tty/ klog/ arch/${ARCH}
+VPATH = memm/ memm/allocator tty/ klog/ arch/${ARCH} clock/
 
 %.c.o: %.c
 	@echo -e "\e[1m\e[33m${CC}\e[0m \e[32m$<\e[0m \e[34m-->\e[0m \e[1m\e[32m$@\e[0m"

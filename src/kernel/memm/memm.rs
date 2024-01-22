@@ -4,7 +4,7 @@ use core::alloc::{GlobalAlloc, Layout};
 
 extern "C" {
     pub fn memm_kernel_allocate(size: usize) -> *mut u8;
-    pub fn memm_user_allocate(size: usize, pid: usize);
+    // pub fn memm_user_allocate(size: usize, pid: usize);
     pub fn memm_free(mem: *mut u8);
 }
 

@@ -6,7 +6,7 @@
 
 typedef enum __tty_type
 {
-    invalid = 0,
+    tty_type_invalid = 0,
     // 用于在内核刚刚被引导，只有bootloader提供的显示功能时使用
     tty_type_raw_framebuffer = 1,
     // 用于图形功能初始化后，直接连接图形接口
@@ -40,8 +40,9 @@ typedef struct __framebuffer framebuffer;
 // 文本模式中的字符由tty模块渲染
 typedef enum __tty_mode
 {
-    tty_mode_text = 0,
-    tty_mode_graphics = 1,
+    tty_mode_invalid = 0,
+    tty_mode_text = 1,
+    tty_mode_graphics = 2,
 } tty_mode;
 
 typedef struct __tty_text_state
@@ -55,6 +56,7 @@ typedef struct __tty_text_state
 typedef struct __tty
 {
     usize id;
+    usize width, height;
     tty_type type;
     tty_typeinfo typeinfo;
     tty_mode mode;
@@ -120,6 +122,14 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor);
 
 #define gen_color(r, g, b) (((r) << 16) | ((g) << 8) | (b))
 
+usize tty_get_width(tty *ttyx);
+usize tty_get_height(tty *ttyx);
+
+tty_type tty_get_type(tty *ttyx);
+tty_mode tty_get_mode(tty *ttyx);
+
+bool tty_is_enabled(tty *ttyx);
+
 /**
  * @brief 打开某个tty
  * 
@@ -130,7 +140,6 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor);
  *  类型的tty占用
  */
 bool tty_enable(tty *ttyx);
-
 void tty_disable(tty *ttyx);
 
 #define TTY_FONT_SCALE 2

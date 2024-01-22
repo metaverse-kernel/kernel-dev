@@ -32,6 +32,8 @@ tty *tty_new(tty_type type, tty_mode mode)
     res->type = type;
     res->mode = mode;
     res->enabled = false;
+    res->width = 0;
+    res->height = 0;
     return res;
 }
 
@@ -52,6 +54,8 @@ void tty_set_framebuffer(tty *ttyx, framebuffer *fb)
     if (ttyx->type != tty_type_raw_framebuffer)
         return;
     memcpy(&ttyx->typeinfo.raw_framebuffer, fb, sizeof(framebuffer));
+    ttyx->width = ttyx->typeinfo.raw_framebuffer.width;
+    ttyx->height = ttyx->typeinfo.raw_framebuffer.height;
     if (ttyx->mode == tty_mode_text)
     {
         ttyx->text.width = fb->width / tty_get_font()->char_width;
@@ -140,6 +144,9 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
 {
     if (ttyx->enabled == false)
         return;
+    // TODO 暂时只支持framebuffer
+    if (ttyx->type != tty_type_raw_framebuffer)
+        return;
     if (ttyx->mode != tty_mode_text)
         return;
     if (ttyx->typeinfo.raw_framebuffer.pixtype == bgr)
@@ -222,6 +229,35 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
         newline(ttyx);
     putchar(ttyx, '\0', gen_color(0x88, 0x88, 0x88), 0);
     simple_lock_unlock(ttyx->text.lock);
+}
+
+usize tty_get_width(tty *ttyx)
+{
+    if (ttyx->mode == tty_mode_text)
+        return ttyx->text.width;
+    return ttyx->width;
+}
+
+usize tty_get_height(tty *ttyx)
+{
+    if (ttyx->mode == tty_mode_text)
+        return ttyx->text.height;
+    return ttyx->height;
+}
+
+tty_type tty_get_type(tty *ttyx)
+{
+    return ttyx->type;
+}
+
+tty_mode tty_get_mode(tty *ttyx)
+{
+    return ttyx->mode;
+}
+
+bool tty_is_enabled(tty *ttyx)
+{
+    return ttyx->enabled;
 }
 
 bool tty_enable(tty *ttyx)
