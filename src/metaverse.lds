@@ -62,6 +62,46 @@ SECTIONS {
     {}
     .igot.plt :
     {}
+    .tbss :
+    {
+        *(.tbss)
+    }
+    .tdata :
+    {
+        *(.tdata)
+    }
+    .debug_line :
+    {
+        *(.debug_line)
+    }
+    .debug_abbrev :
+    {
+        *(.debug_abbrev)
+    }
+    .debug_info :
+    {
+        *(.debug_info)
+    }
+    .debug_str :
+    {
+        *(.debug_str)
+    }
+    .debug_aranges :
+    {
+        *(.debug_aranges)
+    }
+    .debug_ranges :
+    {
+        *(.debug_ranges)
+    }
+    .debug_pubnames :
+    {
+        *(.debug_pubnames)
+    }
+    .debug_pubtypes :
+    {
+        *(.debug_pubtypes)
+    }
     .kend :
     {
         *(.kend)

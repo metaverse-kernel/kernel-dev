@@ -26,8 +26,11 @@ RSCFLAGS = --emit obj --crate-type lib \
 	-L crate="${PWD}/../rustlib/${ARCH}/src/" \
 	-C code-model=large \
 	-C relocation-model=static \
-	-C embed-bitcode=no \
-	-C opt-level=z
+	-C embed-bitcode=no
+
+ifdef release
+	RSCFLAGS := -O
+endif
 
 ifeq (${ARCH},x86_64)
 	RSCFLAGS := ${RSCFLAGS} -C target-feature=-sse,-avx
