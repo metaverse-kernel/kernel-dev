@@ -17,12 +17,6 @@ SECTIONS {
     {
         *(.cpumeta)
     }
-    . = 4M;
-    ..kstack :
-    {
-        kstack = .;
-        *(.kstack)
-    }
     . = 16M;
     .text :
     {
