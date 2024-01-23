@@ -1,4 +1,11 @@
-use std::{fmt::Debug, ptr::null_mut};
+use core::ptr::null_mut;
+
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 
 extern "C" {
     fn tty_new(tty_type: u8, mode: u8) -> *mut u8;
@@ -140,13 +147,7 @@ pub struct Color(pub u8, pub u8, pub u8);
 
 impl ToString for Color {
     fn to_string(&self) -> String {
-        format!("Color({:02x}, {:02x}, {:02x})", self.0, self.1, self.2)
-    }
-}
-
-impl Debug for Color {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:02x}{:02x}{:02x}", self.0, self.1, self.2)
+        format!("{:02x}{:02x}{:02x}", self.0, self.1, self.2)
     }
 }
 
@@ -165,11 +166,13 @@ impl ColorPair {
     }
 }
 
-impl Debug for ColorPair {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl ToString for ColorPair {
+    fn to_string(&self) -> String {
         match self {
-            ColorPair::Reset => write!(f, "\x1b{{}}"),
-            ColorPair::Color { fore, back } => write!(f, "\x1b{{{:?}{:?}}}", fore, back),
+            ColorPair::Reset => format!("\x1b{{}}"),
+            ColorPair::Color { fore, back } => {
+                format!("\x1b{{{}{}}}", fore.to_string(), back.to_string())
+            }
         }
     }
 }

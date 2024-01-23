@@ -1,4 +1,6 @@
-use std::{cmp::Ordering, fmt::Debug, ops::Sub, time::Duration};
+use core::{cmp::Ordering, ops::Sub, time::Duration};
+
+use alloc::{format, string::ToString};
 
 extern "C" {
     fn system_time_get() -> usize;
@@ -14,8 +16,8 @@ pub struct SystemTime {
     ns_time: usize,
 }
 
-impl Debug for SystemTime {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl ToString for SystemTime {
+    fn to_string(&self) -> alloc::string::String {
         let second_dur = 1000usize;
         let minute_dur = second_dur * 60;
         let hour_dur = minute_dur * 60;
@@ -93,8 +95,7 @@ impl Debug for SystemTime {
         minute /= minute_dur;
         let milisec = second % second_dur;
         second /= second_dur;
-        write!(
-            f,
+        format!(
             "[{:02}-{:02}-{:02} {:02}:{:02}:{:02}.{:03}]",
             year, month, day, hour, minute, second, milisec
         )
@@ -118,7 +119,7 @@ impl Ord for SystemTime {
 }
 
 impl PartialOrd for SystemTime {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.unix_time.partial_cmp(&other.unix_time) {
             Some(Ordering::Equal) => self.ns_time.partial_cmp(&other.ns_time),
             ord => ord,

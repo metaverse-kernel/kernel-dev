@@ -1,3 +1,7 @@
+use alloc::string::ToString;
+use alloc::{format, vec::Vec};
+use alloc::vec;
+
 use super::{
     clock::time::SystemTime,
     tty::tty::{Color, Message, MessageBuilder},
@@ -149,7 +153,7 @@ impl Iterator for LogIterator {
         if let Some((time, msg)) = self.logs.first() {
             Some(
                 MessageBuilder::new()
-                    .message(format!("{:?}", time))
+                    .message(format!("{}", time.to_string()))
                     .append(MessageBuilder::from_message(msg))
                     .build(),
             )

@@ -1,19 +1,18 @@
-use std::{
-    ops::{Deref, DerefMut},
-    ptr::null_mut,
-};
+use core::{ops::{Deref, DerefMut}, ptr::null_mut};
+
+use alloc::{vec, vec::Vec};
 
 /// ## RwLock<T>
 /// 读写锁
-/// 
+///
 /// * 对于写入操作：
-/// 
+///
 /// 锁没有占用时，获取锁，并执行闭包。
-/// 
+///
 /// 当锁已经被占用，将闭包悬挂。
-/// 
+///
 /// 释放锁时，将所有悬挂的闭包都执行。
-/// 
+///
 /// 正在释放锁时，`write`方法返回`Err(())`
 ///
 /// ```

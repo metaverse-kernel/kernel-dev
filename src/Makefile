@@ -37,16 +37,8 @@ ifeq (${ARCH},x86_64)
 endif
 
 RUSTLIB_PATH = ../rustlib/${ARCH}/lib
-RUST_LIBS = "${RUSTLIB_PATH}/libaddr2line.rlib" "${RUSTLIB_PATH}/libadler.rlib" \
-	"${RUSTLIB_PATH}/liballoc.rlib" "${RUSTLIB_PATH}/libcfg_if.rlib" "${RUSTLIB_PATH}/libcompiler_builtins.rlib" \
-	"${RUSTLIB_PATH}/libcore.rlib" "${RUSTLIB_PATH}/libgetopts.rlib" "${RUSTLIB_PATH}/libgimli.rlib" \
-	"${RUSTLIB_PATH}/libhashbrown.rlib" "${RUSTLIB_PATH}/libmemchr.rlib" "${RUSTLIB_PATH}/libminiz_oxide.rlib" \
-	"${RUSTLIB_PATH}/libobject.rlib" "${RUSTLIB_PATH}/libpanic_abort.rlib" "${RUSTLIB_PATH}/libpanic_unwind.rlib" \
-	"${RUSTLIB_PATH}/libproc_macro.rlib" "${RUSTLIB_PATH}/libprofiler_builtins.rlib" \
-	"${RUSTLIB_PATH}/librustc_demangle.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_alloc.rlib" \
-	"${RUSTLIB_PATH}/librustc_std_workspace_core.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_std.rlib" \
-	"${RUSTLIB_PATH}/libstd_detect.rlib" "${RUSTLIB_PATH}/libstd.rlib" "${RUSTLIB_PATH}/libsysroot.rlib" \
-	"${RUSTLIB_PATH}/libtest.rlib" "${RUSTLIB_PATH}/libunicode_width.rlib" "${RUSTLIB_PATH}/libunwind.rlib"
+RUST_LIBS = "${RUSTLIB_PATH}/liballoc.rlib" "${RUSTLIB_PATH}/libcompiler_builtins.rlib" \
+	"${RUSTLIB_PATH}/libcore.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_core.rlib"
 
 ################################
 
