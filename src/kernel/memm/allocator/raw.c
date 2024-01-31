@@ -17,17 +17,19 @@ void *raw_allocator_allocate(raw_allocator_t *allocator, usize size, usize align
 {
     usize real_size = size;
     align_to(real_size, 16);
-    raw_allocator_cell *cell = allocator->cells;
-    while ((void *)raw_allocator_next_cell(cell) < (void *)allocator + allocator->size)
+    raw_allocator_cell *cell = &allocator->cells;
+    while ((void *)cell < raw_allocator_end(allocator))
     {
         while ( // 确保cell指向的内容还在这个allocator内
-            (void *)raw_allocator_next_cell(cell) < raw_allocator_end(allocator) &&
+            (void *)cell < raw_allocator_end(allocator) &&
             cell->length != 0)
         {
             cell = raw_allocator_next_cell(cell);
         }
         if (real_size <= cell->capacity)
             break;
+        else
+            cell = raw_allocator_next_cell(cell);
     }
     if ((void *)cell < raw_allocator_end(allocator))
         goto fitable_cell_finded;
