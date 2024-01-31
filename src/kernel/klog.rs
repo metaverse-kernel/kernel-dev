@@ -1,6 +1,6 @@
 use alloc::string::ToString;
-use alloc::{format, vec::Vec};
 use alloc::vec;
+use alloc::vec::Vec;
 
 use super::{
     clock::time::SystemTime,
@@ -40,125 +40,157 @@ impl KernelLogger {
 
     pub fn fatal(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
-            .message("Fatal: ".to_string())
+            .message("Fatal: ")
             .foreground_color(Color(0xee, 0xa, 0xa))
-            .append(MessageBuilder::from_message(&msg))
+            .append(MessageBuilder::from_message(msg))
             .build();
         self.fatal_queue.push((SystemTime::now(), msg));
     }
 
     pub fn error(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
-            .message("Error: ".to_string())
+            .message("Error: ")
             .foreground_color(Color(0xaa, 0x22, 0x22))
-            .append(MessageBuilder::from_message(&msg))
+            .append(MessageBuilder::from_message(msg))
             .build();
         self.error_queue.push((SystemTime::now(), msg));
     }
 
     pub fn warning(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
-            .message("Warning: ".to_string())
+            .message("Warning: ")
             .foreground_color(Color(0xaa, 0xa, 0xaa))
-            .append(MessageBuilder::from_message(&msg))
+            .append(MessageBuilder::from_message(msg))
             .build();
         self.warning_queue.push((SystemTime::now(), msg));
     }
 
     pub fn info(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
-            .message("Info: ".to_string())
+            .message("Info: ")
             .foreground_color(Color(0xa, 0xee, 0xa))
-            .append(MessageBuilder::from_message(&msg))
+            .append(MessageBuilder::from_message(msg))
             .build();
         self.info_queue.push((SystemTime::now(), msg));
     }
 
     pub fn debug(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
-            .message("Debug: ".to_string())
+            .message("Debug: ")
             .foreground_color(Color(0xee, 0xee, 0xee))
-            .append(MessageBuilder::from_message(&msg))
+            .append(MessageBuilder::from_message(msg))
             .build();
         self.debug_queue.push((SystemTime::now(), msg));
     }
 
     pub fn trace(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
-            .message("Trace: ".to_string())
+            .message("Trace: ")
             .foreground_color(Color(0xee, 0xee, 0xee))
-            .append(MessageBuilder::from_message(&msg))
+            .append(MessageBuilder::from_message(msg))
             .build();
         self.trace_queue.push((SystemTime::now(), msg));
     }
 
     pub fn iter(&self, level: LoggerLevel) -> LogIterator {
         let mut logs = vec![];
-        if level == LoggerLevel::Fatal {
-            logs.push(&self.fatal_queue);
-        }
-        if level == LoggerLevel::Fatal || level == LoggerLevel::Error {
-            logs.push(&self.error_queue);
-        }
-        if level == LoggerLevel::Fatal
-            || level == LoggerLevel::Error
-            || level == LoggerLevel::Warning
-        {
-            logs.push(&self.warning_queue);
-        }
-        if level == LoggerLevel::Fatal
-            || level == LoggerLevel::Error
-            || level == LoggerLevel::Warning
-            || level == LoggerLevel::Info
-        {
-            logs.push(&self.info_queue);
-        }
-        if level == LoggerLevel::Fatal
-            || level == LoggerLevel::Error
-            || level == LoggerLevel::Warning
-            || level == LoggerLevel::Info
-            || level == LoggerLevel::Debug
-        {
-            logs.push(&self.debug_queue);
-        }
-        if level == LoggerLevel::Fatal
-            || level == LoggerLevel::Error
-            || level == LoggerLevel::Warning
-            || level == LoggerLevel::Info
-            || level == LoggerLevel::Debug
-            || level == LoggerLevel::Trace
-        {
-            logs.push(&self.trace_queue);
+        match level {
+            LoggerLevel::Fatal => {
+                logs.push(&self.fatal_queue);
+            }
+            LoggerLevel::Error => {
+                logs.push(&self.fatal_queue);
+                logs.push(&self.error_queue);
+            }
+            LoggerLevel::Warning => {
+                logs.push(&self.fatal_queue);
+                logs.push(&self.error_queue);
+                logs.push(&self.warning_queue);
+            }
+            LoggerLevel::Info => {
+                logs.push(&self.fatal_queue);
+                logs.push(&self.error_queue);
+                logs.push(&self.warning_queue);
+                logs.push(&self.info_queue);
+            }
+            LoggerLevel::Debug => {
+                logs.push(&self.fatal_queue);
+                logs.push(&self.error_queue);
+                logs.push(&self.warning_queue);
+                logs.push(&self.info_queue);
+                logs.push(&self.debug_queue);
+            }
+            LoggerLevel::Trace => {
+                logs.push(&self.fatal_queue);
+                logs.push(&self.error_queue);
+                logs.push(&self.warning_queue);
+                logs.push(&self.info_queue);
+                logs.push(&self.debug_queue);
+                logs.push(&self.trace_queue);
+            }
         }
         let mut res = vec![];
-        while let Some(msg) = {
-            logs.iter_mut()
-                .filter_map(|&mut l| l.first().cloned())
-                .min_by_key(|&(syst, _)| syst)
-        } {
-            res.push(msg);
+        let mut indeces = Vec::new();
+        for _ in 0..logs.len() {
+            indeces.push(0usize);
+        }
+        let all_end = |indeces: &Vec<usize>, logs: &Vec<&Vec<(SystemTime, Message)>>| {
+            for i in 0..indeces.len() {
+                if indeces[i] < logs.len() {
+                    return false;
+                }
+            }
+            return true;
+        };
+        while !all_end(&indeces, &logs) {
+            let mut min_ind = None;
+            let mut min = None;
+            for i in 0..indeces.len() {
+                if indeces[i] >= logs[i].len() {
+                    continue;
+                }
+                if let Some(minx) = min.as_mut() {
+                    if logs[i][indeces[i]].0 < *minx {
+                        *minx = logs[i][indeces[i]].0;
+                        min_ind = Some(i);
+                    }
+                } else {
+                    min = Some(logs[i][indeces[i]].0);
+                    min_ind = Some(i);
+                }
+            }
+            if let Some(mini) = min_ind {
+                res.push(&logs[mini][indeces[mini]]);
+                indeces[mini] += 1;
+            } else {
+                break;
+            }
         }
         LogIterator { logs: res }
     }
 }
 
-pub struct LogIterator {
-    logs: Vec<(SystemTime, Message)>,
+pub struct LogIterator<'a> {
+    logs: Vec<&'a (SystemTime, Message)>,
 }
 
-impl Iterator for LogIterator {
+impl<'a> Iterator for LogIterator<'a> {
     type Item = Message;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some((time, msg)) = self.logs.first() {
+        let res = if let Some((time, msg)) = self.logs.first() {
             Some(
                 MessageBuilder::new()
-                    .message(format!("{}", time.to_string()))
-                    .append(MessageBuilder::from_message(msg))
+                    .message(&time.to_string())
+                    .append(MessageBuilder::from_message(msg.clone()))
                     .build(),
             )
         } else {
             None
+        };
+        if let Some(_) = res {
+            self.logs.remove(0);
         }
+        res
     }
 }

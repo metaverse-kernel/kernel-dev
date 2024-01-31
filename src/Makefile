@@ -46,7 +46,6 @@ metaverse.elf: kernel libk rust metaverse.lds
 	@echo -e "\e[1;33mld\e[0m \e[1;32m$@\e[0m \e[34m<--\e[0m \e[32m${SUBOBJS}\e[0m"
 	@ld -T metaverse.lds -Map=metaverse.map -unresolved-symbols=ignore-all -o $@ ${SUBOBJS} ${RUST_LIBS} \
 		2>&1 | "${SOURCE}/colorize" "warning:=yellow" "error:=red" "ld=lyellow"
-	@strip $@
 
 .PHONY: kernel libk all clear postproc rust
 

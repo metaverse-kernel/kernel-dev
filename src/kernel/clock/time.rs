@@ -1,6 +1,8 @@
 use core::{cmp::Ordering, ops::Sub, time::Duration};
 
-use alloc::{format, string::ToString};
+use alloc::string::ToString;
+
+use crate::format;
 
 extern "C" {
     fn system_time_get() -> usize;
@@ -96,7 +98,7 @@ impl ToString for SystemTime {
         let milisec = second % second_dur;
         second /= second_dur;
         format!(
-            "[{:02}-{:02}-{:02} {:02}:{:02}:{:02}.{:03}]",
+            "[ {}-{}-{} {}:{}:{}.{} ]",
             year, month, day, hour, minute, second, milisec
         )
     }

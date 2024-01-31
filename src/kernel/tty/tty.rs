@@ -1,7 +1,6 @@
 use core::ptr::null_mut;
 
 use alloc::{
-    format,
     string::{String, ToString},
     vec,
     vec::Vec,
@@ -145,38 +144,6 @@ impl Tty {
 #[derive(Clone, Copy)]
 pub struct Color(pub u8, pub u8, pub u8);
 
-impl ToString for Color {
-    fn to_string(&self) -> String {
-        format!("{:02x}{:02x}{:02x}", self.0, self.1, self.2)
-    }
-}
-
-pub enum ColorPair {
-    Reset,
-    Color { fore: Color, back: Color },
-}
-
-impl ColorPair {
-    pub fn reset() -> Self {
-        ColorPair::Reset
-    }
-
-    pub fn color(fore: Color, back: Color) -> Self {
-        ColorPair::Color { fore, back }
-    }
-}
-
-impl ToString for ColorPair {
-    fn to_string(&self) -> String {
-        match self {
-            ColorPair::Reset => format!("\x1b{{}}"),
-            ColorPair::Color { fore, back } => {
-                format!("\x1b{{{}{}}}", fore.to_string(), back.to_string())
-            }
-        }
-    }
-}
-
 impl From<Color> for u32 {
     fn from(value: Color) -> Self {
         let res = (value.0 as u32) << 16 | (value.1 as u32) << 8 | (value.2 as u32);
@@ -196,69 +163,44 @@ pub struct MessageSection {
     bgcolor: Color,
 }
 
+/// ## Message
+///
+/// 用`MessageBuilder`构造一个`Message`对象
 #[derive(Clone)]
 pub struct Message(Vec<MessageSection>);
 
-impl From<String> for Message {
-    fn from(value: String) -> Self {
-        let mut res = MessageBuilder::new();
-        let mut msg = String::new();
-        let mut color = ColorPair::Reset;
-        let mut coloring = false;
-
-        let mut colorp_str = String::new();
-
-        for c in value.as_bytes() {
-            if *c as char == '\x1b' {
-                coloring = true;
-                res.message_mut(msg.clone());
-                msg.clear();
-                if let ColorPair::Color { fore, back } = color {
-                    res.foreground_color_mut(fore);
-                    res.background_color_mut(back);
-                }
-                continue;
-            }
-            if coloring {
-                if *c as char == '{' {
-                    colorp_str.clear();
-                } else if *c as char == '}' {
-                    if colorp_str.is_empty() {
-                        color = ColorPair::Reset;
-                    } else {
-                        let bts = colorp_str.as_bytes();
-                        let r = bts[0] << 4 + bts[1];
-                        let g = bts[2] << 4 + bts[3];
-                        let b = bts[4] << 4 + bts[5];
-                        let fore = Color(r, g, b);
-                        let r = bts[6] << 4 + bts[7];
-                        let g = bts[8] << 4 + bts[9];
-                        let b = bts[10] << 4 + bts[11];
-                        let back = Color(r, g, b);
-                        color = ColorPair::Color { fore, back };
-                    }
-                    coloring = false;
-                } else {
-                    colorp_str.push(*c as char);
-                }
-                continue;
-            }
-            msg.push(*c as char);
-        }
-        if !msg.is_empty() {
-            res.message_mut(msg.clone());
-            msg.clear();
-            if let ColorPair::Color { fore, back } = color {
-                res.foreground_color_mut(fore);
-                res.background_color_mut(back);
-            }
-        }
-        res.build()
-    }
-}
-
+/// ## MessageBuilder
+///
+/// 使用链式调用模式构造一个消息.
+///
+/// 一个`Message`包含多个`MessageSection`，每个`MessageSection`以`message()`调用开始，
+/// `message()`调用后可接0个或多个属性设置。
+///
+/// ```rust
+/// MessageBuilder::new()
+///     .message("Hello, ")
+///     .message("Metaverse").foreground_color(Color(0xa, 0xee, 0xa))
+///     .message("!\n")
+///     .build();
+/// ```
+///
+/// 对于特殊情况可以使用非链式调用：
+/// ```rust
+/// let mut msg = MessageBuilder::new();
+/// msg.message_mut("Hello, ");
+/// msg.message_mut("Metaverse");
+/// msg.foreground_color(Color(0xa, 0xee, 0xa));
+/// msg.message_mut("!\n");
+/// let msg = msg.build();
+/// ```
 pub struct MessageBuilder {
     msg: Message,
+}
+
+pub enum BuilderFunctions<'a> {
+    Msg(&'a str),
+    FgColor(Color),
+    BgColor(Color),
 }
 
 impl MessageBuilder {
@@ -268,22 +210,22 @@ impl MessageBuilder {
         }
     }
 
-    pub fn from_message(msg: &Message) -> Self {
-        Self { msg: msg.clone() }
+    pub fn from_message(msg: Message) -> Self {
+        Self { msg }
     }
 
-    pub fn message(mut self, msg: String) -> Self {
+    pub fn message(mut self, msg: &str) -> Self {
         self.msg.0.push(MessageSection {
-            msg,
+            msg: msg.to_string(),
             fgcolor: Color(0xee, 0xee, 0xee),
             bgcolor: Color(0, 0, 0),
         });
         self
     }
 
-    pub fn message_mut(&mut self, msg: String) {
+    pub fn message_mut(&mut self, msg: &str) {
         self.msg.0.push(MessageSection {
-            msg,
+            msg: msg.to_string(),
             fgcolor: Color(0xee, 0xee, 0xee),
             bgcolor: Color(0, 0, 0),
         });
