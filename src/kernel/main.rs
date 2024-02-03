@@ -13,7 +13,7 @@ extern "C" fn kmain_rust() -> ! {
     logger.info(message!(
         Msg("Hello, "),
         Msg("Metaverse"),
-        FgColor(Color(0xa, 0xee, 0xa)),
+        FgColor(Color::GREEN),
         Msg("!\n")
     ));
     for msg in logger.iter(LoggerLevel::Info) {

@@ -41,7 +41,7 @@ impl KernelLogger {
     pub fn fatal(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
             .message("Fatal: ")
-            .foreground_color(Color(0xee, 0xa, 0xa))
+            .foreground_color(Color::RED)
             .append(MessageBuilder::from_message(msg))
             .build();
         self.fatal_queue.push((SystemTime::now(), msg));
@@ -50,7 +50,7 @@ impl KernelLogger {
     pub fn error(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
             .message("Error: ")
-            .foreground_color(Color(0xaa, 0x22, 0x22))
+            .foreground_color(Color::ORANGE)
             .append(MessageBuilder::from_message(msg))
             .build();
         self.error_queue.push((SystemTime::now(), msg));
@@ -59,7 +59,7 @@ impl KernelLogger {
     pub fn warning(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
             .message("Warning: ")
-            .foreground_color(Color(0xaa, 0xa, 0xaa))
+            .foreground_color(Color::PURPLE)
             .append(MessageBuilder::from_message(msg))
             .build();
         self.warning_queue.push((SystemTime::now(), msg));
@@ -68,7 +68,7 @@ impl KernelLogger {
     pub fn info(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
             .message("Info: ")
-            .foreground_color(Color(0xa, 0xee, 0xa))
+            .foreground_color(Color::GREEN)
             .append(MessageBuilder::from_message(msg))
             .build();
         self.info_queue.push((SystemTime::now(), msg));
@@ -77,7 +77,7 @@ impl KernelLogger {
     pub fn debug(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
             .message("Debug: ")
-            .foreground_color(Color(0xee, 0xee, 0xee))
+            .foreground_color(Color::WHITE)
             .append(MessageBuilder::from_message(msg))
             .build();
         self.debug_queue.push((SystemTime::now(), msg));
@@ -86,7 +86,7 @@ impl KernelLogger {
     pub fn trace(&mut self, msg: Message) {
         let msg = MessageBuilder::new()
             .message("Trace: ")
-            .foreground_color(Color(0xee, 0xee, 0xee))
+            .foreground_color(Color::WHITE)
             .append(MessageBuilder::from_message(msg))
             .build();
         self.trace_queue.push((SystemTime::now(), msg));

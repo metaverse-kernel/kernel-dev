@@ -7,21 +7,21 @@ use alloc::{
 };
 
 extern "C" {
-    fn tty_new(tty_type: u8, mode: u8) -> *mut u8;
-    fn tty_get(id: usize) -> *mut *mut u8;
-    fn tty_text_print(ttyx: *mut u8, string: *mut u8, color: u32, bgcolor: u32);
-    fn tty_get_id(tty: *mut u8) -> usize;
+    pub fn tty_new(tty_type: u8, mode: u8) -> *mut u8;
+    pub fn tty_get(id: usize) -> *mut *mut u8;
+    pub fn tty_text_print(ttyx: *mut u8, string: *mut u8, color: u32, bgcolor: u32);
+    pub fn tty_get_id(tty: *mut u8) -> usize;
 
-    fn tty_get_width(tty: *mut u8) -> usize;
-    fn tty_get_height(tty: *mut u8) -> usize;
+    pub fn tty_get_width(tty: *mut u8) -> usize;
+    pub fn tty_get_height(tty: *mut u8) -> usize;
 
-    fn tty_get_type(tty: *mut u8) -> u8;
-    fn tty_get_mode(tty: *mut u8) -> u8;
+    pub fn tty_get_type(tty: *mut u8) -> u8;
+    pub fn tty_get_mode(tty: *mut u8) -> u8;
 
-    fn tty_is_enabled(tty: *mut u8) -> bool;
+    pub fn tty_is_enabled(tty: *mut u8) -> bool;
 
-    fn tty_enable(tty: *mut u8) -> bool;
-    fn tty_disable(tty: *mut u8);
+    pub fn tty_enable(tty: *mut u8) -> bool;
+    pub fn tty_disable(tty: *mut u8);
 }
 
 pub enum Type {
@@ -143,6 +143,18 @@ impl Tty {
 
 #[derive(Clone, Copy)]
 pub struct Color(pub u8, pub u8, pub u8);
+
+impl Color {
+    pub const WHITE: Color = Color(0xee, 0xee, 0xee);
+    pub const BLACK: Color = Color(0, 0, 0);
+    pub const RED: Color = Color(0xee, 0x22, 0x22);
+    pub const GREEN: Color = Color(0x22, 0xee, 0x22);
+    pub const BLUE: Color = Color(0x22, 0x22, 0xee);
+    pub const YELLOW: Color = Color(0xee, 0x22, 0x22);
+    pub const ORANGE: Color = Color(0xee, 0xee, 0x22);
+    pub const PURPLE: Color = Color(0xee, 0, 0xee);
+    pub const PINK: Color = Color(0xee, 0x44, 0x66);
+}
 
 impl From<Color> for u32 {
     fn from(value: Color) -> Self {
