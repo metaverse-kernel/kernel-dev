@@ -2,3 +2,18 @@
 name = "metaverse"
 version = "0.1.0"
 edition = "2021"
+
+# 此Cargo.toml仅用于rust-analyzer识别rust部分的代码
+# 不应使用cargo编译
+
+[build]
+type = "staticlib"
+rustflags = [
+    "-C", "embed-bitcode=no",
+    "-C", "code-model=large",
+    "-C", "relocation-model=static",
+    "-L", "crate=${PWD}/../rustlib/${ARCH}/src/"
+]
+
+[target.'cfg(target_arch = "x86_64")']
+target = "x86_64-unknown-none"

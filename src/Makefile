@@ -22,11 +22,17 @@ endif
 ################################
 # rust语言环境变量
 
-RSCFLAGS = --emit obj --crate-type lib \
+RSCFLAGS = --emit obj --crate-type staticlib --verbose \
+	--crate-name=metaverse \
+	--edition 2021 \
 	-L crate="${PWD}/../rustlib/${ARCH}/src/" \
 	-C code-model=large \
 	-C relocation-model=static \
 	-C embed-bitcode=no
+
+ifeq (${ARCH},x86_64)
+	RSCFLAGS := ${RSCFLAGS} --target x86_64-unknown-none
+endif
 
 ifdef release
 	RSCFLAGS := -O
