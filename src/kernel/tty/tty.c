@@ -169,6 +169,7 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
         char c = *string;
         if (c == '\n')
         { // 换行
+            putchar(ttyx, ' ', 0, 0);
             newline(ttyx);
             continue;
         }
