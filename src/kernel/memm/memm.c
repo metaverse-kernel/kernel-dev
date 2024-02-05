@@ -192,7 +192,7 @@ void *memm_allocate(usize size, usize pid)
                            MEMM_RAW_ALLOCATOR, pid);
     allocator = new_allocator;
 
-    allocator_iterator_t *allind = memm_allocate(sizeof(allocator_iterator_t), 0);
+    allocator_iterator_t *allind = memm_kernel_allocate(sizeof(allocator_iterator_t));
     allind->allocator = new_allocator;
     allind->left = nullptr;
     allind->right = nullptr;
@@ -200,13 +200,21 @@ void *memm_allocate(usize size, usize pid)
     ptr = new_allocator->allocate(&new_allocator->allocator_instance, orgsize, 0);
 
 after_allocation:
-    memm_addr_set_allocator(ptr, allocator);
-    if (pid != 0)
-    { // TODO 进程管理中应该有一个用户地址-内核地址映射表
-      // 在进程分配时将页映射到用户空间中，并将这个映射关系记录进这个表中
-      // 需要返回的是用户空间的地址
-    }
+    if (ptr != nullptr)
+        memm_addr_set_allocator(ptr, allocator);
     return ptr;
+}
+
+void *memm_kernel_allocate(usize size)
+{
+    return memm_allocate(size, 0);
+}
+
+void *memm_user_allocate(usize size, usize pid)
+{
+    void *res = memm_allocate(size, pid);
+    // TODO 将内存空间映射到用户空间
+    return res;
 }
 
 void memm_free(void *mem)

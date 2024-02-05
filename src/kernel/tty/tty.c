@@ -11,26 +11,29 @@ tty_controller_t *tty_controller_new()
 {
     memset(tty_ctrler.ttys, 0, sizeof(tty_ctrler.ttys));
     memset(tty_ctrler.map, 0, sizeof(tty_ctrler.map));
+    memset(tty_ctrler.enabled, 0, sizeof(tty_ctrler.enabled));
     return &tty_ctrler;
 }
 
 tty *tty_new(tty_type type, tty_mode mode)
 {
-    tty *__tty = memm_allocate(sizeof(tty), 0);
-    memset(__tty, 0, sizeof(tty));
-    __tty->type = type;
-    __tty->mode = mode;
     tty *res = nullptr;
     for (usize i = 0; i < TTY_MAX_NUM; ++i)
     {
         if (tty_ctrler.map[i] == false)
         {
-            res = __tty;
-            __tty->id = i;
-            tty_ctrler.ttys[i] = __tty;
+            res = memm_kernel_allocate(sizeof(tty));
+            res->id = i;
+            tty_ctrler.ttys[i] = res;
             tty_ctrler.map[i] = true;
+            break;
         }
     }
+    res->type = type;
+    res->mode = mode;
+    res->enabled = false;
+    res->width = 0;
+    res->height = 0;
     return res;
 }
 
@@ -51,10 +54,14 @@ void tty_set_framebuffer(tty *ttyx, framebuffer *fb)
     if (ttyx->type != tty_type_raw_framebuffer)
         return;
     memcpy(&ttyx->typeinfo.raw_framebuffer, fb, sizeof(framebuffer));
+    ttyx->width = ttyx->typeinfo.raw_framebuffer.width;
+    ttyx->height = ttyx->typeinfo.raw_framebuffer.height;
     if (ttyx->mode == tty_mode_text)
     {
         ttyx->text.width = fb->width / tty_get_font()->char_width;
         ttyx->text.height = fb->height / tty_get_font()->char_height;
+        ttyx->text.line = 0;
+        ttyx->text.column = 0;
     }
 }
 
@@ -87,12 +94,13 @@ inline static void putchar(
                 {
                     for (usize b = 0; b < TTY_FONT_SCALE; ++b)
                     {
-                        put_pixel(ttyx->typeinfo.raw_framebuffer.pointer,
-                                  ttyx->typeinfo.raw_framebuffer.width,
-                                  ttyx->typeinfo.raw_framebuffer.pixsize,
-                                  ttyx->text.column * font->char_width * TTY_FONT_SCALE + i * TTY_FONT_SCALE + a,
-                                  ttyx->text.line * font->char_height * TTY_FONT_SCALE + j * TTY_FONT_SCALE + b,
-                                  color);
+                        put_pixel(
+                            ttyx->typeinfo.raw_framebuffer.pointer,
+                            ttyx->typeinfo.raw_framebuffer.width,
+                            ttyx->typeinfo.raw_framebuffer.pixsize,
+                            ttyx->text.column * font->char_width * TTY_FONT_SCALE + i * TTY_FONT_SCALE + a,
+                            ttyx->text.line * font->char_height * TTY_FONT_SCALE + j * TTY_FONT_SCALE + b,
+                            color);
                     }
                 }
             }
@@ -102,12 +110,13 @@ inline static void putchar(
                 {
                     for (usize b = 0; b < TTY_FONT_SCALE; ++b)
                     {
-                        put_pixel(ttyx->typeinfo.raw_framebuffer.pointer,
-                                  ttyx->typeinfo.raw_framebuffer.width,
-                                  ttyx->typeinfo.raw_framebuffer.pixsize,
-                                  ttyx->text.column * font->char_width * TTY_FONT_SCALE + i * TTY_FONT_SCALE + a,
-                                  ttyx->text.line * font->char_height * TTY_FONT_SCALE + j * TTY_FONT_SCALE + b,
-                                  bgcolor);
+                        put_pixel(
+                            ttyx->typeinfo.raw_framebuffer.pointer,
+                            ttyx->typeinfo.raw_framebuffer.width,
+                            ttyx->typeinfo.raw_framebuffer.pixsize,
+                            ttyx->text.column * font->char_width * TTY_FONT_SCALE + i * TTY_FONT_SCALE + a,
+                            ttyx->text.line * font->char_height * TTY_FONT_SCALE + j * TTY_FONT_SCALE + b,
+                            bgcolor);
                     }
                 }
             }
@@ -121,17 +130,23 @@ inline static void newline(tty *ttyx)
     ttyx->text.line++;
     if (ttyx->text.line == ttyx->text.height)
     {
-        scroll_buffer(ttyx->typeinfo.raw_framebuffer.pointer,
-                      ttyx->typeinfo.raw_framebuffer.width,
-                      ttyx->typeinfo.raw_framebuffer.height,
-                      ttyx->typeinfo.raw_framebuffer.pixsize,
-                      tty_get_font()->char_height * TTY_FONT_SCALE);
+        scroll_buffer(
+            ttyx->typeinfo.raw_framebuffer.pointer,
+            ttyx->typeinfo.raw_framebuffer.width,
+            ttyx->typeinfo.raw_framebuffer.height,
+            ttyx->typeinfo.raw_framebuffer.pixsize,
+            tty_get_font()->char_height * TTY_FONT_SCALE);
         ttyx->text.line--;
     }
 }
 
 void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
 {
+    if (ttyx->enabled == false)
+        return;
+    // TODO 暂时只支持framebuffer
+    if (ttyx->type != tty_type_raw_framebuffer)
+        return;
     if (ttyx->mode != tty_mode_text)
         return;
     if (ttyx->typeinfo.raw_framebuffer.pixtype == bgr)
@@ -147,13 +162,14 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
         }
     }
     tty_font_t *font = tty_get_font();
-    simple_lock_lock(ttyx->text.lock);
     usize len = strlen(string);
+    simple_lock_lock(ttyx->text.lock);
     for (char *str = string; string - str < len; string++)
     {
         char c = *string;
         if (c == '\n')
         { // 换行
+            putchar(ttyx, ' ', 0, 0);
             newline(ttyx);
             continue;
         }
@@ -173,11 +189,12 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
             ttyx->text.line++;
             if (ttyx->text.line == ttyx->text.height)
             {
-                scroll_buffer(ttyx->typeinfo.raw_framebuffer.pointer,
-                              ttyx->typeinfo.raw_framebuffer.width,
-                              ttyx->typeinfo.raw_framebuffer.height,
-                              ttyx->typeinfo.raw_framebuffer.pixsize,
-                              font->char_height * TTY_FONT_SCALE);
+                scroll_buffer(
+                    ttyx->typeinfo.raw_framebuffer.pointer,
+                    ttyx->typeinfo.raw_framebuffer.width,
+                    ttyx->typeinfo.raw_framebuffer.height,
+                    ttyx->typeinfo.raw_framebuffer.pixsize,
+                    font->char_height * TTY_FONT_SCALE);
                 ttyx->text.line--;
             }
             continue;
@@ -192,11 +209,12 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
         }
         else if (c == '\f')
         { // 滚动一行
-            scroll_buffer(ttyx->typeinfo.raw_framebuffer.pointer,
-                          ttyx->typeinfo.raw_framebuffer.width,
-                          ttyx->typeinfo.raw_framebuffer.height,
-                          ttyx->typeinfo.raw_framebuffer.pixsize,
-                          font->char_height * TTY_FONT_SCALE);
+            scroll_buffer(
+                ttyx->typeinfo.raw_framebuffer.pointer,
+                ttyx->typeinfo.raw_framebuffer.width,
+                ttyx->typeinfo.raw_framebuffer.height,
+                ttyx->typeinfo.raw_framebuffer.pixsize,
+                font->char_height * TTY_FONT_SCALE);
             continue;
         }
         // 打印字符c
@@ -212,4 +230,59 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
         newline(ttyx);
     putchar(ttyx, '\0', gen_color(0x88, 0x88, 0x88), 0);
     simple_lock_unlock(ttyx->text.lock);
+}
+
+usize tty_get_width(tty *ttyx)
+{
+    if (ttyx->mode == tty_mode_text)
+        return ttyx->text.width;
+    return ttyx->width;
+}
+
+usize tty_get_height(tty *ttyx)
+{
+    if (ttyx->mode == tty_mode_text)
+        return ttyx->text.height;
+    return ttyx->height;
+}
+
+tty_type tty_get_type(tty *ttyx)
+{
+    return ttyx->type;
+}
+
+tty_mode tty_get_mode(tty *ttyx)
+{
+    return ttyx->mode;
+}
+
+bool tty_is_enabled(tty *ttyx)
+{
+    return ttyx->enabled;
+}
+
+bool tty_enable(tty *ttyx)
+{
+    if (tty_ctrler.enabled[ttyx->id])
+        return false;
+    if (ttyx->type == tty_type_raw_framebuffer)
+    {
+        for (usize i = 0; i < TTY_MAX_NUM; ++i)
+        {
+            if (ttyx->id != i &&
+                tty_ctrler.enabled[i] != nullptr &&
+                tty_ctrler.ttys[i]->type == tty_type_raw_framebuffer)
+                return false;
+        }
+    }
+
+    ttyx->enabled = true;
+    tty_ctrler.enabled[ttyx->id] = ttyx;
+    return true;
+}
+
+void tty_disable(tty *ttyx)
+{
+    ttyx->enabled = false;
+    tty_ctrler.enabled[ttyx->id] = false;
 }

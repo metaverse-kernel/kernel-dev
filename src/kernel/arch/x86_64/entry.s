@@ -39,10 +39,6 @@ multiboot2_header:
         dd 8
 multiboot2_header_end:
 
-    section .kstack
-kstack:
-    resb 0x1000000 - 0x400000
-
     section .kend
     global kend
 kend:

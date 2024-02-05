@@ -22,28 +22,29 @@ endif
 ################################
 # rust语言环境变量
 
-RSCFLAGS = --emit obj --crate-type lib \
+RSCFLAGS = --emit obj --crate-type staticlib --verbose \
+	--crate-name=metaverse \
+	--edition 2021 \
 	-L crate="${PWD}/../rustlib/${ARCH}/src/" \
 	-C code-model=large \
 	-C relocation-model=static \
-	-C embed-bitcode=no \
-	-C opt-level=z
+	-C embed-bitcode=no
 
 ifeq (${ARCH},x86_64)
-	RSCFLAGS := ${RSCFLAGS} -C target-feature=-sse,-avx
+	RSCFLAGS := ${RSCFLAGS} --target x86_64-unknown-none
+endif
+
+ifdef release
+	RSCFLAGS := -O
+endif
+
+ifeq (${ARCH},x86_64)
+	RSCFLAGS := ${RSCFLAGS} -C target-feature=-sse
 endif
 
 RUSTLIB_PATH = ../rustlib/${ARCH}/lib
-RUST_LIBS = "${RUSTLIB_PATH}/libaddr2line.rlib" "${RUSTLIB_PATH}/libadler.rlib" \
-	"${RUSTLIB_PATH}/liballoc.rlib" "${RUSTLIB_PATH}/libcfg_if.rlib" "${RUSTLIB_PATH}/libcompiler_builtins.rlib" \
-	"${RUSTLIB_PATH}/libcore.rlib" "${RUSTLIB_PATH}/libgetopts.rlib" "${RUSTLIB_PATH}/libgimli.rlib" \
-	"${RUSTLIB_PATH}/libhashbrown.rlib" "${RUSTLIB_PATH}/libmemchr.rlib" "${RUSTLIB_PATH}/libminiz_oxide.rlib" \
-	"${RUSTLIB_PATH}/libobject.rlib" "${RUSTLIB_PATH}/libpanic_abort.rlib" "${RUSTLIB_PATH}/libpanic_unwind.rlib" \
-	"${RUSTLIB_PATH}/libproc_macro.rlib" "${RUSTLIB_PATH}/libprofiler_builtins.rlib" \
-	"${RUSTLIB_PATH}/librustc_demangle.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_alloc.rlib" \
-	"${RUSTLIB_PATH}/librustc_std_workspace_core.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_std.rlib" \
-	"${RUSTLIB_PATH}/libstd_detect.rlib" "${RUSTLIB_PATH}/libstd.rlib" "${RUSTLIB_PATH}/libsysroot.rlib" \
-	"${RUSTLIB_PATH}/libtest.rlib" "${RUSTLIB_PATH}/libunicode_width.rlib" "${RUSTLIB_PATH}/libunwind.rlib"
+RUST_LIBS = "${RUSTLIB_PATH}/liballoc.rlib" "${RUSTLIB_PATH}/libcompiler_builtins.rlib" \
+	"${RUSTLIB_PATH}/libcore.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_core.rlib"
 
 ################################
 

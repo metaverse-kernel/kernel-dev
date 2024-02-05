@@ -56,7 +56,7 @@ make debug
   * [x] 内存分配器
     * [x] raw_allocator
 * [x] tty
-* [ ] 内核日志
+* [x] 内核日志
 * [ ] 文件系统
   * [ ] vfs
   * [ ] fat32驱动（移植）
