@@ -1,8 +1,6 @@
 use core::{cmp::Ordering, ops::Sub, time::Duration};
 
-use alloc::string::ToString;
-
-use crate::format;
+use alloc::{format, string::ToString};
 
 extern "C" {
     fn system_time_get() -> usize;
