@@ -47,7 +47,7 @@ unsafe fn kernel_panic_handler(info: &PanicInfo) -> ! {
             } else {
                 "Unknown panic."
             },
-            (Color::GREEN, Color::BLACK),
+            (Color::BLUE, Color::BLACK),
         ));
         v.push(("\n", (Color::BLACK, Color::BLACK)));
         v

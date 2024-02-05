@@ -96,7 +96,7 @@ impl ToString for SystemTime {
         let milisec = second % second_dur;
         second /= second_dur;
         format!(
-            "[ {}-{}-{} {}:{}:{}.{} ]",
+            "[ {}-{}-{} {}:{}:{}.{} ] ",
             year, month, day, hour, minute, second, milisec
         )
     }
