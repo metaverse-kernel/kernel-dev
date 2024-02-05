@@ -96,6 +96,10 @@ SECTIONS {
     {
         *(.debug_pubtypes)
     }
+    .debug_frame :
+    {
+        *(.debug_frame)
+    }
     .kend :
     {
         *(.kend)

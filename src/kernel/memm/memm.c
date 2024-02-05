@@ -200,7 +200,8 @@ void *memm_allocate(usize size, usize pid)
     ptr = new_allocator->allocate(&new_allocator->allocator_instance, orgsize, 0);
 
 after_allocation:
-    memm_addr_set_allocator(ptr, allocator);
+    if (ptr != nullptr)
+        memm_addr_set_allocator(ptr, allocator);
     return ptr;
 }
 

@@ -139,9 +139,9 @@ allocator对象在进程与内核之间传递时一律使用内核空间的映�
  */
 void *memm_allocate(usize size, usize pid);
 #define memm_addr_set_allocator(mem, allocator) \
-    *(allocator_t **)(mem - 16) = allocator;
+    *(allocator_t **)((void *)(mem) - 16) = allocator;
 #define memm_addr_get_allocator(mem) \
-    ((*(allocator_t **)(mem - 16)))
+    ((*(allocator_t **)((void *)(mem) - 16)))
 
 void *memm_kernel_allocate(usize size);
 
