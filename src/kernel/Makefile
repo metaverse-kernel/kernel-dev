@@ -11,7 +11,7 @@ ifdef release
 	CCFLAGS := ${CCFLAGS} -O2
 endif
 
-C_SRCS = main.c tty.c font.c memm.c memm_${ARCH}.c raw.c time.c
+C_SRCS = main.c tty.c font.c memm.c memm_${ARCH}.c raw.c time.c syscall_${ARCH}.c
 C_OBJS = ${C_SRCS:.c=.c.o}
 
 ################################
@@ -26,7 +26,7 @@ endif
 ASMFLAGS := ${ASMFLAGS}
 ASMFLAGS32 = -f elf32
 
-S_SRCS = entry32.s entry.s memm_${ARCH}.s kernel.s
+S_SRCS = entry32.s entry.s memm_${ARCH}.s kernel.s syscall_${ARCH}.s
 S_OBJS = ${S_SRCS:.s=.s.o}
 
 ################################

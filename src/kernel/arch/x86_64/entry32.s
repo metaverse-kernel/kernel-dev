@@ -37,6 +37,13 @@ init32:
         add edi, 4
     loop init32_loop0
 
+    ; 设置idt_ptr
+    mov eax, 0x10403a   ; idt_ptr + 2
+    mov dword [eax], 0x104050
+    ; 加载IDTR寄存器
+    db 0x66
+    lidt [0x104038]
+
     ; 设置gdt_ptr
     mov eax, 0x10402a   ; gdt_ptr + 2
     mov dword [eax], 0x104000   ; gdt
@@ -98,6 +105,18 @@ gdt:
     dq  0x0000f20000000000   ; 用户态数据段
 gdt_end:
 
-gdt_ptr:
+gdt_ptr:    ; 0x104028
     dw  gdt_end - gdt - 1
     dq  gdt
+
+    resb 6
+
+idt_ptr:    ; 0x104038
+    dw 0x7ff
+    dq idt
+
+    resb 14
+
+    global idt
+idt:
+    resq 512    ; 16 bytes per descriptor (512 q-bytes)

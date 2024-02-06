@@ -1,13 +1,31 @@
     section .entry  align=8
     extern kmain
+    extern systemcall_procedure
     global init64
 init64:
     endbr64
     cli
+
+    ; 加载段寄存器
     mov rax, 0x1000000
     mov rbp, rax
     mov rsp, rax
     mov rdi, rbx
+
+    ; 加载系统调用相关寄存器
+    ; IA32_STAR = 0x0018_0008_0000_0000
+    mov rcx, 0xc0000081
+    mov rax, 0x0018000800000000
+    wrmsr
+    ; IA32_FMASK = 0xffff_ffff
+    inc rcx
+    mov rax, 0xffffffff
+    wrmsr
+    ; IA32_LSTAR = [systemcall_procedure]
+    lea rcx, [rcx + 2]
+    lea rax, [systemcall_procedure]
+    wrmsr
+
     jmp kmain
 
     section .multiboot2 align=8
