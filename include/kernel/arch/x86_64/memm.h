@@ -15,7 +15,7 @@ typedef enum __memm_page_size
 
 extern u64 PML4[512];
 
-#define MEMM_PAGE_TABLE_FLAGS_AREA ((u64)0xfff)
+#define MEMM_PAGE_TABLE_FLAGS_MASK ((u64)0xfff)
 
 /* 页对齐掩码 */
 #define MEMM_4K_ALIGN_MASK ((u64)0xfff)

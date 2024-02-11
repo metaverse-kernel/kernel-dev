@@ -2,6 +2,7 @@
 #define X86_64_INTERRUPT_H 1
 
 #include <types.h>
+#include <utils.h>
 
 typedef struct __gate_descriptor_t
 {
@@ -11,7 +12,7 @@ typedef struct __gate_descriptor_t
     u16 offset_23;
     u32 offset_4567;
     u32 reserved;
-} gate_descriptor_t;
+} DISALIGNED gate_descriptor_t;
 
 // interrupt stack table，每个表项都指向tss
 // 需要加载寄存器IA32_INTERRUPT_SSP_TABLE
