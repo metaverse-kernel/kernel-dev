@@ -23,7 +23,7 @@
 /* 只分配不映射空间 */
 #define MEMM_ALLOC_ONLY_MEMORY (128 * 1024 * 1024)
 
-typedef void *(*memm_allocate_t)(void *allocator, usize size, usize align);
+typedef void *(*memm_allocate_t)(void *allocator, usize size);
 typedef void (*memm_free_t)(void *allocator, void *mem);
 
 /*

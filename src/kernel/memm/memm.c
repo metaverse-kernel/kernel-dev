@@ -24,7 +24,7 @@ mem_manager_t *memm_new(usize mem_size)
         MEMM_RAW_ALLOCATOR, 0);
 
     allocator_iterator_t *alcatr_ind = allocator0->allocate(
-        &allocator0->allocator_instance, sizeof(allocator_iterator_t), 0);
+        &allocator0->allocator_instance, sizeof(allocator_iterator_t));
 
     alcatr_ind->allocator = allocator0;
     alcatr_ind->left = nullptr;
@@ -37,7 +37,7 @@ mem_manager_t *memm_new(usize mem_size)
     align_to(pmc_size, 8);
     pmc_size /= 8;
 
-    memory_manager.page_map = allocator0->allocate(&allocator0->allocator_instance, pmc_size, 0);
+    memory_manager.page_map = allocator0->allocate(&allocator0->allocator_instance, pmc_size);
     memset(memory_manager.page_map, 0, pmc_size);
     memset(memory_manager.page_map, 0xff, MEMM_ALLOC_ONLY_MEMORY / MEMM_PAGE_SIZE / 8);
     for (usize i = (MEMM_ALLOC_ONLY_MEMORY / MEMM_PAGE_SIZE / 8) * (u8)8;
@@ -48,7 +48,7 @@ mem_manager_t *memm_new(usize mem_size)
 
     // 配置分配器页地图
     memory_manager.map_with_allocator =
-        allocator0->allocate(&allocator0->allocator_instance, pmc_size, 0);
+        allocator0->allocate(&allocator0->allocator_instance, pmc_size);
     memset(memory_manager.map_with_allocator, 0, pmc_size);
     for (usize i = kernel_initial_size / MEMM_PAGE_SIZE;
          i < MEMM_ALLOC_ONLY_MEMORY / MEMM_PAGE_SIZE;
@@ -59,7 +59,7 @@ mem_manager_t *memm_new(usize mem_size)
 
     // 分配器释放页地图
     memory_manager.map_with_destructed_allocator =
-        allocator0->allocate(&allocator0->allocator_instance, pmc_size, 0);
+        allocator0->allocate(&allocator0->allocator_instance, pmc_size);
     memset(memory_manager.map_with_destructed_allocator, 0, pmc_size);
 
     // 配置空闲页线段搜索表
@@ -103,14 +103,14 @@ void *memm_find_and_allocate(allocator_iterator_t *allocator_ind, usize size, us
     allocator_t *allocator = allocator_ind->allocator;
     if (allocator->pid == pid && allocator->full == false)
     { // 尝试用本节点分配
-        if ((ptr = allocator->allocate(&allocator->allocator_instance, size, 0)) != nullptr)
+        if ((ptr = allocator->allocate(&allocator->allocator_instance, size)) != nullptr)
         {
             *writeback = allocator;
             return ptr;
         }
         else
         {
-            if ((ptr = allocator->allocate(&allocator->allocator_instance, 0, 0)) == nullptr)
+            if ((ptr = allocator->allocate(&allocator->allocator_instance, 0)) == nullptr)
                 allocator->full = true;
         }
     }
@@ -197,7 +197,7 @@ void *memm_allocate(usize size, usize pid)
     allind->left = nullptr;
     allind->right = nullptr;
     insert_allocator(memory_manager.allocators, allind);
-    ptr = new_allocator->allocate(&new_allocator->allocator_instance, orgsize, 0);
+    ptr = new_allocator->allocate(&new_allocator->allocator_instance, orgsize);
 
 after_allocation:
     if (ptr != nullptr)

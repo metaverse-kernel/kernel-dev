@@ -13,7 +13,7 @@ void raw_allocator_new(raw_allocator_t *allocator, usize size)
     allocator->cells[0].length = 0;
 }
 
-void *raw_allocator_allocate(raw_allocator_t *allocator, usize size, usize align)
+void *raw_allocator_allocate(raw_allocator_t *allocator, usize size)
 {
     usize real_size = size;
     align_to(real_size, 16);
