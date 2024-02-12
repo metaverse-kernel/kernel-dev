@@ -32,6 +32,9 @@ typedef void (*memm_free_t)(void *allocator, void *mem);
  */
 typedef struct __allocator_t
 {
+    #define MEMM_ALLOCATOR_MAGIC_NUM 0x271fe441
+    u32 magic;
+
     bool initialized;
 
     // 在本分配器中调用allocate返回nullptr后为true
@@ -47,7 +50,6 @@ typedef struct __allocator_t
     // 分配器实例的allocate函数
     // 无法分配空间返回nullptr
     // 在size参数为0时，保证不可以分配空间，但是如果空间已满依然返回nullptr
-    // 当参数align=0时表示不需要对齐
     memm_allocate_t allocate;
 
     // 分配器实例的free函数
@@ -129,7 +131,6 @@ void memm_allocator_destruct(allocator_t *allocator);
 
 /*
 申请内存
-第三个参数也是返回值，表示申请内存使用的分配器
 pid=0时为内核分配
 所有内存在内核空间都有对物理内存空间的直接映射，也就是线性地址与物理地址相同，称为内核地址
 

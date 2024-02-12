@@ -72,6 +72,7 @@ mem_manager_t *memm_new(usize mem_size)
 allocator_t *memm_allocator_new(void *start, usize length, usize type, usize pid)
 {
     allocator_t *allocator = start;
+    allocator->magic = MEMM_ALLOCATOR_MAGIC_NUM;
     allocator->initialized = true;
     allocator->full = false;
     allocator->pid = 0;
@@ -220,6 +221,8 @@ void *memm_user_allocate(usize size, usize pid)
 void memm_free(void *mem)
 {
     allocator_t *allocator = memm_addr_get_allocator(mem);
+    if (allocator->magic != MEMM_ALLOCATOR_MAGIC_NUM)
+        return;
     if (is_user_address((u64)mem))
     { // TODO 对于用户空间的地址需要先转换到内核地址后释放
     }

@@ -36,7 +36,7 @@ typedef struct __raw_allocator_t
 
 void raw_allocator_new(raw_allocator_t *allocator, usize size);
 
-void *raw_allocator_allocate(raw_allocator_t *allocator, usize size, usize align);
+void *raw_allocator_allocate(raw_allocator_t *allocator, usize size);
 void raw_allocator_free(raw_allocator_t *allocator, void *mem);
 
 #endif
