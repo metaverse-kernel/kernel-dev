@@ -35,7 +35,7 @@ void kmain(void *mb2_bootinfo)
     }
 
     // 初始化内存管理模块
-    mem_manager_t *memm = memm_new(mem_size);
+    memory_manager_t *memm = memm_new(mem_size);
 
     // 初始化tty模块
     tty_controller_t *tty_controler = tty_controller_new();

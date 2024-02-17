@@ -110,7 +110,6 @@ bool memm_map_pageframes_to(
         return false;
     while (size != 0)
     {
-        // 这是当前需要映射的页的内存对齐（或者说是当前映射的页的大小）
         memm_page_size align = memm_get_page_align(physical);
         if (align == MEMM_PAGE_SIZE_1G)
         {
@@ -123,6 +122,20 @@ bool memm_map_pageframes_to(
                 align = MEMM_4K_ALIGN_MASK + 1;
         }
         align /= MEMM_PAGE_SIZE;
+        memory_manager_t *mm = memm_get_manager();
+        switch (align)
+        {
+        case MEMM_PAGE_SIZE_4K:
+            mm->mapped_4k_page++;
+        case MEMM_PAGE_SIZE_2M:
+            mm->mapped_2m_page++;
+        case MEMM_PAGE_SIZE_1G:
+            mm->mapped_1g_page++;
+        }
+        for (usize i = physical / MEMM_PAGE_SIZE; i < physical / MEMM_PAGE_SIZE + align; i++)
+        {
+            bitmap_set(mm->page_map, i);
+        }
 
         map_pageframe_to(target, physical, user, write, align);
 

@@ -5,9 +5,9 @@
 #include <libk/string.h>
 #include <libk/bits.h>
 
-mem_manager_t memory_manager;
+memory_manager_t memory_manager;
 
-mem_manager_t *memm_new(usize mem_size)
+memory_manager_t *memm_new(usize mem_size)
 {
     memset(&memory_manager, 0, sizeof(memory_manager));
     memory_manager.memory_size = mem_size;
@@ -47,25 +47,30 @@ mem_manager_t *memm_new(usize mem_size)
     }
 
     // 配置分配器页地图
-    memory_manager.map_with_allocator =
+    memory_manager.allocator_map =
         allocator0->allocate(&allocator0->allocator_instance, pmc_size);
-    memset(memory_manager.map_with_allocator, 0, pmc_size);
+    memset(memory_manager.allocator_map, 0, pmc_size);
     for (usize i = kernel_initial_size / MEMM_PAGE_SIZE;
          i < MEMM_ALLOC_ONLY_MEMORY / MEMM_PAGE_SIZE;
          i += MEMM_PAGE_SIZE)
     {
-        bitmap_set(memory_manager.map_with_allocator, i);
+        bitmap_set(memory_manager.allocator_map, i);
     }
 
     // 分配器释放页地图
-    memory_manager.map_with_destructed_allocator =
+    memory_manager.destructed_allocator_map =
         allocator0->allocate(&allocator0->allocator_instance, pmc_size);
-    memset(memory_manager.map_with_destructed_allocator, 0, pmc_size);
+    memset(memory_manager.destructed_allocator_map, 0, pmc_size);
 
     // 配置空闲页线段搜索表
     memory_manager.available_pages_table = lst_new(0, memory_manager.page_amount);
     lst_remove(memory_manager.available_pages_table, 0, MEMM_ALLOC_ONLY_MEMORY / MEMM_PAGE_SIZE, false);
 
+    return &memory_manager;
+}
+
+memory_manager_t *memm_get_manager()
+{
     return &memory_manager;
 }
 
@@ -177,7 +182,7 @@ void *memm_allocate(usize size, usize pid)
         return nullptr; // 内存中已经没有可分配的页了
     for (usize i = allocator_start; i < allocator_start + size; i++)
     {
-        bitmap_set(memory_manager.map_with_allocator, i);
+        bitmap_set(memory_manager.allocator_map, i);
     }
     memm_map_pageframes_to(
         allocator_start * MEMM_PAGE_SIZE, allocator_start * MEMM_PAGE_SIZE,
