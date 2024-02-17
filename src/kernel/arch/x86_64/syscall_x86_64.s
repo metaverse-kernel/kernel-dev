@@ -50,6 +50,10 @@ set_kernel_stack_cache:
     pop rax
     ret
 
+; void return_from_systemcall()
+return_from_systemcall:
+    sysret
+
 save_kernel_stack:
     endbr64
     lea rbx, [kernel_stack_cache]
