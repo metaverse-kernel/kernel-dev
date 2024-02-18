@@ -186,11 +186,7 @@ typedef struct __mem_manager_t
 
     // 已经映射的页数量。若不是最小的页会被视作多个最小页计数。
     usize mapped_page_amount;
-#ifdef __x86_64__
-    usize mapped_4k_page;
-    usize mapped_2m_page;
-    usize mapped_1g_page;
-#endif
+    memm_page_counter platformed_page_counter;
 
     // 页地图。每个bit都表示这个页是否被映射。
     u8 *page_map;

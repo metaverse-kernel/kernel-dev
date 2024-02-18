@@ -126,11 +126,11 @@ bool memm_map_pageframes_to(
         switch (align)
         {
         case MEMM_PAGE_SIZE_4K:
-            mm->mapped_4k_page++;
+            mm->platformed_page_counter.mapped_4k_page++;
         case MEMM_PAGE_SIZE_2M:
-            mm->mapped_2m_page++;
+            mm->platformed_page_counter.mapped_2m_page++;
         case MEMM_PAGE_SIZE_1G:
-            mm->mapped_1g_page++;
+            mm->platformed_page_counter.mapped_1g_page++;
         }
         for (usize i = physical / MEMM_PAGE_SIZE; i < physical / MEMM_PAGE_SIZE + align; i++)
         {
