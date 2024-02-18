@@ -12,9 +12,11 @@ ifdef release
 	release = 1
 endif
 
+ALLOCATOR_MAGIC = $(shell doas hwclock | sha512sum | head -c 128 | md5sum | head -c 8)
+
 SUBOBJS = kernel/kernel.o libk/libk.o rust.o
 
-DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}"
+DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}" ALLOCATOR_MAGIC="${ALLOCATOR_MAGIC}"
 ifdef release
 	DEFINES := ${DEFINES} release=1
 endif
