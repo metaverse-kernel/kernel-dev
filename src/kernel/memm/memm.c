@@ -77,8 +77,7 @@ memory_manager_t *memm_get_manager()
 allocator_t *memm_allocator_new(void *start, usize length, usize type, usize pid)
 {
     allocator_t *allocator = start;
-    allocator->magic = MEMM_ALLOCATOR_MAGIC_NUM;
-    allocator->initialized = true;
+    allocator->magic = MEMM_ALLOCATOR_MAGIC;
     allocator->full = false;
     allocator->pid = 0;
     allocator->size = length;
@@ -91,14 +90,14 @@ allocator_t *memm_allocator_new(void *start, usize length, usize type, usize pid
         allocator->free = (memm_free_t)raw_allocator_free;
         break;
     default:
-        allocator->initialized = false;
+        allocator->magic = 0;
         break;
     }
 }
 
 void memm_allocator_destruct(allocator_t *allocator)
 {
-    allocator->initialized = false;
+    allocator->magic = 0;
     // TODO 从分配器树中删除这个分配器
     KERNEL_TODO();
 }
@@ -226,7 +225,7 @@ void *memm_user_allocate(usize size, usize pid)
 void memm_free(void *mem)
 {
     allocator_t *allocator = memm_addr_get_allocator(mem);
-    if (allocator->magic != MEMM_ALLOCATOR_MAGIC_NUM)
+    if (allocator->magic != MEMM_ALLOCATOR_MAGIC)
         return;
     if (is_user_address((u64)mem))
     { // TODO 对于用户空间的地址需要先转换到内核地址后释放

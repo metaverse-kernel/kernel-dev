@@ -35,9 +35,9 @@
  *
  * 分配器的一对`分配`、`释放`函数指针。内核中可以根据情况使用多种不同的分配器来分配内存，`allocator`中提供一对此类型的变量，用于
  * 动态绑定不同的分配器。
- * 
+ *
  * 分配器在`kernel/memm/allocator/`中定义。
- * 
+ *
  * 分配器**必须**实现的行为：
  *
  * **`memm_allocate_t`**：
@@ -78,7 +78,11 @@ typedef void (*memm_free_t)(void *allocator, void *mem);
  * 在**内核镜像结尾**至`MEMM_ALLOC_ONLY_MEMORY`空间中，包含一个分配器`内核大分配器`。
  *
  * 分配器指针**必须**使用内核地址。
- *
+ * 
+ * @internal magic
+ * 
+ * 分配器有效性由此检验，不为`MEMM_ALLOCATOR_MAGIC_NUM`说明获得了一个错误的分配器地址。
+ * 
  * @internal full
  *
  * 调用分配器的`allocate`方法后，在返回`nullptr`时会设为`true`。
@@ -87,6 +91,10 @@ typedef void (*memm_free_t)(void *allocator, void *mem);
  * @internal pid
  *
  * 进程标志服，表示此分配器所属的进程，为0代表属于内核。
+ *
+ * @internal userspace
+ *
+ * 若分配器不属于内核，此成员储存此分配器的用户空间地址。
  *
  * @internal type
  *
@@ -107,10 +115,12 @@ typedef void (*memm_free_t)(void *allocator, void *mem);
  */
 typedef struct __allocator_t
 {
-#define MEMM_ALLOCATOR_MAGIC_NUM 0x271fe441
+#ifndef MEMM_ALLOCATOR_MAGIC
+#define MEMM_ALLOCATOR_MAGIC 0x271fe441
+#endif
+    // 分配器有效性由此检验，不为`MEMM_ALLOCATOR_MAGIC_NUM`说明获得了一个错误的分配器地址。
+    // 此值在编译时通过各种方式确定，若
     u32 magic;
-
-    bool initialized;
 
     // 调用分配器的`allocate`方法后，在返回`nullptr`时会设为`true`。
     // 调用分配器的`free`方法时设为`false`。
@@ -118,6 +128,8 @@ typedef struct __allocator_t
 
     // 进程标志服，表示此分配器所属的进程，为0代表属于内核。
     usize pid;
+    // 若分配器不属于内核，此成员储存此分配器的用户空间地址。
+    void *userspace;
     // 分配器类型。在目录`include/kernel/memm/allocator`中对每个分配器分别定义一个唯一值。
     usize type;
     usize size;
@@ -290,18 +302,18 @@ void *memm_user_allocate(usize size, usize pid);
 
 /**
  * @name memm_free
- * 
+ *
  * ```c
  * void memm_free(void *mem);
  * ```
- * 
+ *
  * 释放内存。
  */
 void memm_free(void *mem);
 
 /**
  * @name find_fitable_pages
- * 
+ *
  * ```c
  * usize find_fitable_pages(usize page_count);
  * ```
