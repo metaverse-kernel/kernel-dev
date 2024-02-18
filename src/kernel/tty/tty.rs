@@ -181,6 +181,16 @@ pub struct MessageSection {
 #[derive(Clone)]
 pub struct Message(Vec<MessageSection>);
 
+impl ToString for Message {
+    fn to_string(&self) -> String {
+        let mut res = String::new();
+        for MessageSection { msg, .. } in self.0.iter() {
+            res += msg;
+        }
+        res
+    }
+}
+
 /// ## MessageBuilder
 ///
 /// 使用链式调用模式构造一个消息.
@@ -226,7 +236,7 @@ impl MessageBuilder {
         Self { msg }
     }
 
-    pub fn message(mut self, msg: &str) -> Self {
+    pub fn message<T: ToString + ?Sized>(mut self, msg: &T) -> Self {
         self.msg.0.push(MessageSection {
             msg: msg.to_string(),
             fgcolor: Color(0xee, 0xee, 0xee),
@@ -235,7 +245,7 @@ impl MessageBuilder {
         self
     }
 
-    pub fn message_mut(&mut self, msg: &str) {
+    pub fn message_mut<T: ToString + ?Sized>(&mut self, msg: &T) {
         self.msg.0.push(MessageSection {
             msg: msg.to_string(),
             fgcolor: Color(0xee, 0xee, 0xee),

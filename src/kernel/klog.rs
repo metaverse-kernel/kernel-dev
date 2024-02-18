@@ -1,4 +1,3 @@
-use alloc::string::ToString;
 use alloc::vec;
 use alloc::vec::Vec;
 
@@ -181,7 +180,7 @@ impl<'a> Iterator for LogIterator<'a> {
         let res = if let Some((time, msg)) = self.logs.first() {
             Some(
                 MessageBuilder::new()
-                    .message(&time.to_string())
+                    .message(time)
                     .append(MessageBuilder::from_message(msg.clone()))
                     .build(),
             )
