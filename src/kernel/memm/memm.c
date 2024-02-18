@@ -228,7 +228,8 @@ void memm_free(void *mem)
     if (allocator->magic != MEMM_ALLOCATOR_MAGIC)
         return;
     if (is_user_address((u64)mem))
-    { // TODO 对于用户空间的地址需要先转换到内核地址后释放
+    {
+        mem = mem - allocator->userspace + (void *)allocator;
     }
     allocator->free(allocator->allocator_instance, mem);
     if (allocator->full)
