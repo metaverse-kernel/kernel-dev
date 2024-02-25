@@ -5,6 +5,18 @@
 #include <libk/bits.h>
 
 /**
+ * @details x86_64
+ * 
+ * 物理地址空间：
+ * 
+ * * 0 \~ 2MB：不使用，不映射
+ * * 2MB \~ 4MB：中断栈。
+ * * 4MB \~ 16MB：内核栈。
+ * * 16MB \~ ?：内核镜像。
+ * * ? \~ 128MB：内核大分配器。
+ */
+
+/**
  * @name MEMM_PAGE_SIZE
  * @addindex 平台定制宏
  *
