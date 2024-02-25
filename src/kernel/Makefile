@@ -7,7 +7,7 @@ CC = gcc
 CCFLAGS = -m64 -mcmodel=large -I ../../include \
 			-fno-stack-protector -fno-exceptions \
 			-fno-builtin -nostdinc -nostdlib \
-			-DMEMM_ALLOCATOR_MAGIC=\"${ALLOCATOR_MAGIC}\"
+			-DMEMM_ALLOCATOR_MAGIC="(u32)(0x${ALLOCATOR_MAGIC})"
 ifdef release
 	CCFLAGS := ${CCFLAGS} -O2
 endif

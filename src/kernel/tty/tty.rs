@@ -206,6 +206,19 @@ impl ToString for Message {
 ///     .build();
 /// ```
 ///
+/// 定义了`message!`宏，简化构造消息的代码：
+///
+/// ```rust
+/// use crate::kernel::tty::tty::BuilderFunctions::*;
+///
+/// message!(
+///     Msg("Hello, "),
+///     Msg("Metaverse"),
+///     FgColor(Color::GREEN),
+///     Msg("!\n"),
+/// );
+/// ```
+///
 /// 对于特殊情况可以使用非链式调用：
 /// ```rust
 /// let mut msg = MessageBuilder::new();

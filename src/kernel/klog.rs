@@ -139,7 +139,7 @@ impl KernelLogger {
                     return false;
                 }
             }
-            return true;
+            true
         };
         while !all_end(&indeces, &logs) {
             let mut min_ind = None;

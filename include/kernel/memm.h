@@ -116,7 +116,7 @@ typedef void (*memm_free_t)(void *allocator, void *mem);
 typedef struct __allocator_t
 {
 #ifndef MEMM_ALLOCATOR_MAGIC
-#define MEMM_ALLOCATOR_MAGIC 0x271fe441
+#define MEMM_ALLOCATOR_MAGIC ((u32)0x271fe441)
 #endif
     // 分配器有效性由此检验，不为`MEMM_ALLOCATOR_MAGIC_NUM`说明获得了一个错误的分配器地址。
     // 此值在编译时通过各种方式确定，若
