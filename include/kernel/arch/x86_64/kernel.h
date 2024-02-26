@@ -12,4 +12,6 @@
  */
 extern void prepare_stack();
 
+extern u32 TSS[26];
+
 #endif

@@ -47,7 +47,7 @@ init32:
     ; 设置gdt_ptr
     mov eax, 0x10402a   ; gdt_ptr + 2
     mov dword [eax], 0x104000   ; gdt
-    ; 加载GDTR和段寄存器
+    ; 加载GDTR、段寄存器和TR寄存器
     db 0x66
     lgdt [0x104028]     ; gdt_ptr
     mov ax, 0x10
@@ -56,6 +56,8 @@ init32:
     mov es, ax
     mov fs, ax
     mov gs, ax
+    mov ax, 0x30
+    ltr ax
 
     ; 打开PAE
     mov eax, cr4
@@ -99,10 +101,13 @@ PD0:
     ; 分段
 gdt:
     dq  0
-    dq  0x0020980000000000   ; 内核态代码段
-    dq  0x0000920000000000   ; 内核态数据段
-    dq  0x0020f80000000000   ; 用户态代码段
-    dq  0x0000f20000000000   ; 用户态数据段
+    dq  0x0020980000000000  ; 内核态代码段
+    dq  0x0000920000000000  ; 内核态数据段
+    dq  0x0020f80000000000  ; 用户态代码段
+    dq  0x0000f20000000000  ; 用户态数据段
+    dq  0
+    dq  0x0000891060000000  ; TSS段（低64位）
+    dq  0                   ; TSS段（高64位）
 gdt_end:
 
 gdt_ptr:    ; 0x104028
@@ -120,3 +125,14 @@ idt_ptr:    ; 0x104038
     global idt
 idt:
     resq 512    ; 16 bytes per descriptor (512 q-bytes)
+
+    section .cpumeta.tss alogn=4096
+    global TSS
+TSS:
+    dd 0
+    dq 0x1000000    ; （rsp0）内核栈
+    dq 0            ; （rsp1）
+    dq 0            ; （rsp2）
+    dq 0
+    dq 0x400000     ; （ist1）中断栈
+    resb 104 - ($ - TSS)

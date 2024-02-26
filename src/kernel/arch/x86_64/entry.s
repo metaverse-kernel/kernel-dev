@@ -26,9 +26,6 @@ init64:
     lea rax, [systemcall_procedure]
     wrmsr
 
-    ; 加载中断相关寄存器
-    ; 需要加载寄存器IA32_INTERRUPT_SSP_TABLE
-
     jmp kmain
 
     section .multiboot2 align=8
