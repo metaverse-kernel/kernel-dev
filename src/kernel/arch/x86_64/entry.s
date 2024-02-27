@@ -6,11 +6,12 @@ init64:
     endbr64
     cli
 
-    ; 加载段寄存器
     mov rax, 0x1000000
     mov rbp, rax
     mov rsp, rax
     mov rdi, rbx
+
+    lidt [0x104010]
 
     ; 加载系统调用相关寄存器
     ; IA32_STAR = 0x0018_0008_0000_0000
