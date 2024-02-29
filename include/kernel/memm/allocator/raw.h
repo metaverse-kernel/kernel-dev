@@ -16,14 +16,6 @@ typedef struct __raw_allocator_cell
 } raw_allocator_cell;
 #define raw_allocator_next_cell(cell) (raw_allocator_cell *)((void *)((cell)->content) + (cell)->capacity)
 
-// 原始分配器
-//
-// 包括至少一个cell，分配时像cell的分裂一样将空白的一段分成两段，
-// 释放时，只把length归零，并不将cell合并。
-// length=0的cell称为空cell
-//
-// 统计从上次细胞合并以来free的调用次数，当调用次数很多或可用空间不足时
-// 触发细胞合并。
 /**
  * @name raw_allocator_t
  * 
@@ -32,6 +24,8 @@ typedef struct __raw_allocator_cell
  * `length`为0的cell称为空cell。
  * 
  * 统计从上次细胞合并以来free的调用次数，当调用次数达到`RAW_ALLOCATOR_FREE_MAX`或无可用空间时触发细胞合并。
+ * 
+ * 使用建议：只在少量allocate和free的情况下使用。使用大量allocate时效率低下并难以得到内存安全保证。
  * 
  * @internal free_count
  * 

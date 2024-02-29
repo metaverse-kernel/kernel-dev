@@ -1,6 +1,6 @@
 SOURCE := $(shell pwd)/src/scripts
 
-.PHONY: all clear run debug config
+.PHONY: all clear run debug config disass
 
 all: config
 	@make -C src all --no-print-directory
@@ -25,3 +25,6 @@ config:
 		touch metaverse_kernel; \
 		"${SOURCE}/depcheck"; \
 	fi
+
+disass:
+	objdump -D src/metaverse.elf > kerndisass.txt
