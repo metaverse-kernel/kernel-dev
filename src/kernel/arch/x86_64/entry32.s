@@ -1,9 +1,6 @@
     section .entry
     extern init64
     ; 寄存器ebx是multiboot2 information，不可以使用
-    ;
-    ; 由于这个代码是32位环境的代码，而链接器链接时会把它当作64位代码链接
-    ; 所以这里所有的使用了常数的位置都要通过指令写入
 init32:
     cli
 
@@ -76,7 +73,6 @@ init32:
     section .cpumeta align=4096
     global PML4
     ; 分页
-    ; 链接器会把这些数据替换掉所以要在代码中重新设置
 PML4:
     dq  0x003 + PDPT0
     resq 511
