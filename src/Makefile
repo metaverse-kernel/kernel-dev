@@ -37,7 +37,7 @@ ifeq (${ARCH},x86_64)
 endif
 
 ifdef release
-	RSCFLAGS := -O
+	RSCFLAGS := ${RSCFLAGS} -O
 endif
 
 ifeq (${ARCH},x86_64)
@@ -69,16 +69,24 @@ postproc:
 	@echo -e "\e[0m"
 
 kernel:
-	@echo -e "\e[33m__\e[0m \e[1;35m[Building kernel]\e[0m \e[33m____\e[0m"
+	@if [ ! ${release} ]; then \
+		echo -e "\e[33m__\e[0m \e[1;35m[Building kernel]\e[0m \e[33m____\e[0m"; \
+	fi
 	@make -C kernel all --no-print-directory ${DEFINES}
-	@echo -e "\e[33m-------------------------\e[0m"
+	@if [ ! ${release} ]; then \
+		echo -e "\e[33m-------------------------\e[0m"; \
+	fi
 
 libk:
-	@echo -e "\e[33m__\e[0m \e[1;35m[Building libk]\e[0m \e[33m______\e[0m"
+	@if [ ! ${release} ]; then \
+		echo -e "\e[33m__\e[0m \e[1;35m[Building libk]\e[0m \e[33m______\e[0m"; \
+	fi
 	@make -C libk all --no-print-directory ${DEFINES}
-	@echo -e "\e[33m-------------------------\e[0m"
+	@if [ ! ${release} ]; then \
+		echo -e "\e[33m-------------------------\e[0m"; \
+	fi
 
-rust:
+rust: postproc
 	@echo -e "\e[1m\e[33mrustc\e[0m \e[34m-->\e[0m \e[1m\e[32m$@.o\e[0m"
 	@rustc ${RSCFLAGS} lib.rs -o rust.o
 
