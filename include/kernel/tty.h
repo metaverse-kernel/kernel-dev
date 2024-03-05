@@ -99,8 +99,8 @@ tty **tty_get(usize id);
 
 /**
  * @brief 获取tty的id
- * 
- * @return usize 
+ *
+ * @return usize
  */
 usize tty_get_id(tty *__tty);
 
@@ -121,6 +121,16 @@ void tty_set_framebuffer(tty *ttyx, framebuffer *fb);
 void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor);
 
 #define gen_color(r, g, b) (((r) << 16) | ((g) << 8) | (b))
+#define WHITE gen_color(0xee, 0xee, 0xee)
+#define BLACK gen_color(0, 0, 0)
+#define RED gen_color(0xee, 0x22, 0x22)
+#define GREEN gen_color(0x22, 0xee, 0x22)
+#define BLUE gen_color(0x22, 0x22, 0xee)
+#define YELLOW gen_color(0xee, 0xee, 0x22)
+#define ORANGE gen_color(0xee, 0xaa, 0x22)
+#define PURPLE gen_color(0xee, 0, 0xee)
+#define PINK gen_color(0xee, 0x44, 0x66)
+#define GRAY gen_color(0xaa, 0xaa, 0xaa)
 
 usize tty_get_width(tty *ttyx);
 usize tty_get_height(tty *ttyx);
@@ -132,8 +142,8 @@ bool tty_is_enabled(tty *ttyx);
 
 /**
  * @brief 打开某个tty
- * 
- * @param ttyx 
+ *
+ * @param ttyx
  * @return true 打开成功
  * @return false 已经打开
  *  或作为raw_framebuffer类型的tty，framebuffer已被其它raw_framebuffer

@@ -150,10 +150,11 @@ impl Color {
     pub const RED: Color = Color(0xee, 0x22, 0x22);
     pub const GREEN: Color = Color(0x22, 0xee, 0x22);
     pub const BLUE: Color = Color(0x22, 0x22, 0xee);
-    pub const YELLOW: Color = Color(0xee, 0x22, 0x22);
-    pub const ORANGE: Color = Color(0xee, 0xee, 0x22);
-    pub const PURPLE: Color = Color(0xee, 0, 0xee);
+    pub const YELLOW: Color = Color(0xee, 0xee, 0x22);
+    pub const ORANGE: Color = Color(0xee, 0xaa, 0x22);
+    pub const PURPLE: Color = Color(0xee, 0x22, 0xee);
     pub const PINK: Color = Color(0xee, 0x44, 0x66);
+    pub const GRAY: Color = Color(0xaa, 0xaa, 0xaa);
 }
 
 impl From<Color> for u32 {
