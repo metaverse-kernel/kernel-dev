@@ -58,8 +58,8 @@ void tty_set_framebuffer(tty *ttyx, framebuffer *fb)
     ttyx->height = ttyx->typeinfo.raw_framebuffer.height;
     if (ttyx->mode == tty_mode_text)
     {
-        ttyx->text.width = fb->width / tty_get_font()->char_width;
-        ttyx->text.height = fb->height / tty_get_font()->char_height;
+        ttyx->text.width = fb->width / (TTY_FONT_SCALE * tty_get_font()->char_width);
+        ttyx->text.height = fb->height / (TTY_FONT_SCALE * tty_get_font()->char_height);
         ttyx->text.line = 0;
         ttyx->text.column = 0;
     }
