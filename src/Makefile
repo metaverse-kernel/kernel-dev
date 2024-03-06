@@ -2,7 +2,7 @@
 
 ARCH := $(shell uname -m)
 PWD := $(shell pwd)
-SOURCE := ${PWD}/scripts
+SOURCE := ${PWD}/../scripts
 ifeq (${ARCH},x86_64)
 	ASM = nasm
 	ASMFLAGS = -f elf64
@@ -12,7 +12,7 @@ ifdef release
 	release = 1
 endif
 
-ALLOCATOR_MAGIC = $(shell doas hwclock | sha512sum | head -c 128 | md5sum | head -c 8)
+ALLOCATOR_MAGIC = $(shell "${SOURCE}/magicgen" | sha512sum | head -c 128 | md5sum | head -c 8)
 
 SUBOBJS = kernel/kernel.o libk/libk.o rust.o
 
@@ -58,6 +58,8 @@ metaverse.elf: kernel libk rust metaverse.lds
 .PHONY: kernel libk all clear postproc rust
 
 all: postproc metaverse.elf
+	@echo -e "Build \e[1;32msucceeded\e[0m."
+	@echo -e "Build ID \e[1;31m$(shell "${SOURCE}/magicgen"|sha512sum|head -c 128|md5sum|head -c 8)\e[0m."
 
 postproc:
 	@echo -n -e "\e[36m"
