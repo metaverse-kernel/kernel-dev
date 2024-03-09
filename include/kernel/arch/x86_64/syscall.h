@@ -24,6 +24,8 @@ extern void *system_calls_table[256];
  * r14 - 参数7
  * r15 - 参数8
  *
+ * 返回值 - rax
+ * 
  * 系统调用时，使用内核主堆栈。
  */
 
