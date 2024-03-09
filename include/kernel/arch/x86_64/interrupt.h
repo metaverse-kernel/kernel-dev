@@ -41,4 +41,29 @@ typedef struct __gate_descriptor_t
  */
 extern gate_descriptor_t idt[256];
 
+#define interrupt_gate_generate(desc, addr)                       \
+    {                                                             \
+        (desc).segment_selector = 0x8;                            \
+        (desc).flags = INTERRUPT_DESCRIPTOR_FLAG_TYPE_INTERRUPT | \
+                       INTERRUPT_DESCRIPTOR_FLAG_IST;             \
+        (desc).reserved = 0;                                      \
+        (desc).offset_01 = (u16)((u64)(addr));                    \
+        (desc).offset_23 = (u16)(((u64)(addr)) >> 16);            \
+        (desc).offset_4567 = (u32)(((u64)(addr)) >> 32);          \
+    }
+
+#define trap_gate_generate(desc, addr)                       \
+    {                                                        \
+        (desc).segment_selector = 0x8;                       \
+        (desc).flags = INTERRUPT_DESCRIPTOR_FLAG_TYPE_TRAP | \
+                       INTERRUPT_DESCRIPTOR_FLAG_IST;        \
+        (desc).reserved = 0;                                 \
+        (desc).offset_01 = (u16)((u64)(addr));               \
+        (desc).offset_23 = (u16)(((u64)(addr)) >> 16);       \
+        (desc).offset_4567 = (u32)(((u64)(addr)) >> 32);     \
+    }
+
+#define interrupt_register_gate(desc, index) \
+    idt[index] = desc;
+
 #endif

@@ -7,12 +7,14 @@ CC = gcc
 CCFLAGS = -m64 -mcmodel=large -I ../../include \
 			-fno-stack-protector -fno-exceptions \
 			-fno-builtin -nostdinc -nostdlib \
-			-DMEMM_ALLOCATOR_MAGIC="(u32)(0x${ALLOCATOR_MAGIC})"
+			-DMEMM_ALLOCATOR_MAGIC="(u32)(0x${ALLOCATOR_MAGIC})" \
+			-DBUILD_ID="${BUILD_ID}"
 ifdef release
 	CCFLAGS := ${CCFLAGS} -O2
 endif
 
-C_SRCS = main.c tty.c font.c memm.c memm_${ARCH}.c raw.c time.c syscall_${ARCH}.c
+C_SRCS = main.c tty.c font.c memm.c memm_${ARCH}.c raw.c time.c syscall_${ARCH}.c interrupt_${ARCH}.c \
+	interrupt_procs.c
 C_OBJS = ${C_SRCS:.c=.c.o}
 
 ################################
@@ -27,7 +29,8 @@ endif
 ASMFLAGS := ${ASMFLAGS}
 ASMFLAGS32 = -f elf32
 
-S_SRCS = entry32.s entry.s memm_${ARCH}.s kernel.s syscall_${ARCH}.s
+S_SRCS = entry32.s entry.s memm_${ARCH}.s kernel.s syscall_${ARCH}.s interrupt_${ARCH}.s \
+	interrupt_procs.s
 S_OBJS = ${S_SRCS:.s=.s.o}
 
 ################################

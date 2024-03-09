@@ -43,6 +43,10 @@ void kmain(void *mb2_bootinfo)
     get_frame_buffer_with_bootinfo(&fb, &bootinfo);
     tty *tty0 = tty_new(tty_type_raw_framebuffer, tty_mode_text);
     tty_set_framebuffer(tty0, &fb);
+    tty_enable(tty0);
+
+    // 初始化中断管理
+    interrupt_init();
 
     // 初始化系统调用
     syscall_init();

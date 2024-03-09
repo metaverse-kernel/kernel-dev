@@ -2,13 +2,15 @@
 #define KERNEL_H 1
 
 #include <types.h>
+#include <kernel/interrupt/procs.h>
 
 #ifdef __x86_64__
-
 #include <kernel/arch/x86_64/kernel.h>
-
 #define ISA_NAME "x86_64"
+#endif
 
+#ifndef BUILD_ID
+#define BUILD_ID 0
 #endif
 
 /**

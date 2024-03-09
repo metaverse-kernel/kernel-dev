@@ -72,7 +72,7 @@ void raw_allocator_free(raw_allocator_t *allocator, void *mem)
 {
     raw_allocator_cell *cell = allocator->cells;
     while ((void *)cell < raw_allocator_end(allocator))
-    {
+    { // TODO  内存错误
         if (mem == cell->content)
         {
             cell->length = 0;
@@ -83,7 +83,7 @@ void raw_allocator_free(raw_allocator_t *allocator, void *mem)
     allocator->rest_memory += cell->capacity + sizeof(raw_allocator_cell);
     allocator->free_count++;
     if ( // 可用内存不超过当前allocator的 5% 或调用free次数很多时
-        allocator->size / allocator->rest_memory > 20 &&
+        allocator->size / allocator->rest_memory > 20 ||
         allocator->free_count > RAW_ALLOCATOR_FREE_MAX)
     {
         raw_allocator_cellmerge(allocator);

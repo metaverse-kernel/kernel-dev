@@ -19,13 +19,3 @@ prepare_stack:
     mov rax, [rax]
     mov [rsp], rax
     ret
-
-    global interrupt_open
-interrupt_open:
-    sti
-    ret
-
-    global interrupt_close
-interrupt_close:
-    cli
-    ret

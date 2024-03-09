@@ -14,9 +14,12 @@ endif
 
 ALLOCATOR_MAGIC = $(shell "${SOURCE}/magicgen" | sha512sum | head -c 128 | md5sum | head -c 8)
 
+BUILD_ID = $(shell "${SOURCE}/magicgen" | sha512sum | head -c 128 | md5sum | head -c 4)
+
 SUBOBJS = kernel/kernel.o libk/libk.o rust.o
 
-DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}" ALLOCATOR_MAGIC="${ALLOCATOR_MAGIC}"
+DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}" \
+	ALLOCATOR_MAGIC="${ALLOCATOR_MAGIC}" BUILD_ID="${BUILD_ID}"
 ifdef release
 	DEFINES := ${DEFINES} release=1
 endif
@@ -59,7 +62,7 @@ metaverse.elf: kernel libk rust metaverse.lds
 
 all: postproc metaverse.elf
 	@echo -e "Build \e[1;32msucceeded\e[0m."
-	@echo -e "Build ID \e[1;31m$(shell "${SOURCE}/magicgen"|sha512sum|head -c 128|md5sum|head -c 8)\e[0m."
+	@echo -e "Build ID \e[1;31m${BUILD_ID}\e[0m."
 
 postproc:
 	@echo -n -e "\e[36m"
