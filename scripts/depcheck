@@ -49,15 +49,17 @@ for mod in kernel_modules:
         print("  " + color['lpink'] + f"{mod}" + color['reset'] + " exists.")
     else:
         print("  " + color['lred'] + f"{mod}" + color['reset'] + " not found.")
-        print("Kernel module " +
-              color['lred'] + f"{mod}" + color['reset'] + " is not installed.")
+        print(
+            "Kernel module " +
+            color['lred'] + f"{mod}" + color['reset'] + " is not installed.")
         exit(-1)
 
 # 检查软件依赖
 pathsenv = os.environ.get("PATH").split(":")
 for software, progs in softwares.items():
-    print("Checking " + color['lcyan'] +
-          f"{software}" + color['reset'] + " ...")
+    print(
+        "Checking " + color['lcyan'] +
+        f"{software}" + color['reset'] + " ...")
     for program in progs:
         exists = False
         for path in pathsenv:
@@ -65,15 +67,19 @@ for software, progs in softwares.items():
                 exists = True
                 break
         if exists:
-            print("  " + color['lyellow'] +
-                  f"{program}" + color['reset'] + " existed.")
+            print(
+                "  " + color['lyellow'] +
+                f"{program}" + color['reset'] + " existed.")
         else:
-            print("  " + color['lred'] +
-                  f"{program}" + color['reset'] + " not found.")
+            print(
+                "  " + color['lred'] +
+                f"{program}" + color['reset'] + " not found.")
 
-            print("Software " + color['lred'] + f"{software}" +
-                  color['reset'] + " is not installed or completed.")
+            print(
+                "Software " + color['lred'] + f"{software}" +
+                color['reset'] + " is not installed or completed.")
             exit(-2)
 
-print("All dependencies are " +
-      color['lgreen'] + "satisfied." + color['reset'])
+print(
+    "All dependencies are " +
+    color['lgreen'] + "satisfied." + color['reset'])
