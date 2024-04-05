@@ -1,9 +1,6 @@
     section .entry
     extern init64
     ; 寄存器ebx是multiboot2 information，不可以使用
-    ;
-    ; 由于这个代码是32位环境的代码，而链接器链接时会把它当作64位代码链接
-    ; 所以这里所有的使用了常数的位置都要通过指令写入
 init32:
     cli
 
@@ -37,18 +34,17 @@ init32:
         add edi, 4
     loop init32_loop0
 
-    ; 设置gdt_ptr
-    mov eax, 0x10402a   ; gdt_ptr + 2
-    mov dword [eax], 0x104000   ; gdt
-    ; 加载GDTR和段寄存器
+    ; 加载GDTR、段寄存器和TR寄存器
     db 0x66
-    lgdt [0x104028]     ; gdt_ptr
+    lgdt [0x104000]     ; gdt_ptr
     mov ax, 0x10
     mov ds, ax
     mov ss, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
+    mov ax, 0x30
+    ltr ax
 
     ; 打开PAE
     mov eax, cr4
@@ -77,7 +73,6 @@ init32:
     section .cpumeta align=4096
     global PML4
     ; 分页
-    ; 链接器会把这些数据替换掉所以要在代码中重新设置
 PML4:
     dq  0x003 + PDPT0
     resq 511
@@ -89,15 +84,43 @@ PDPT0:
 PD0:
     resq 512
 
-    ; 分段
-gdt:
-    dq  0
-    dq  0x0020980000000000   ; 内核态代码段
-    dq  0x0000920000000000   ; 内核态数据段
-    dq  0x0020f80000000000   ; 用户态代码段
-    dq  0x0000f20000000000   ; 用户态数据段
-gdt_end:
+    section .cpumeta.tblptrs
 
-gdt_ptr:
+gdt_ptr:    ; 0x104000
     dw  gdt_end - gdt - 1
     dq  gdt
+
+    dd 0
+    dw 0
+
+idt_ptr:    ; 0x104010
+    dw 0x7ff
+    dq idt
+
+    section .cpumeta.gdt align=4096
+gdt:
+    dq  0
+    dq  0x0020980000000000  ; 内核态代码段
+    dq  0x0000920000000000  ; 内核态数据段
+    dq  0x0020f80000000000  ; 用户态代码段
+    dq  0x0000f20000000000  ; 用户态数据段
+    dq  0
+    dq  0x0000891070000068  ; TSS段（低64位）
+    dq  0                   ; TSS段（高64位）
+gdt_end:
+
+    section .cpumeta.idt align=4096
+    global idt
+idt:
+    resq 512    ; 16 bytes per descriptor (512 q-bytes)
+
+    section .cpumeta.tss align=4096
+    global TSS
+TSS:
+    dd 0
+    dq 0x1000000    ; （rsp0）内核栈
+    dq 0            ; （rsp1）
+    dq 0            ; （rsp2）
+    dq 0
+    dq 0x400000     ; （ist1）中断栈
+    resb 104 - ($ - TSS)

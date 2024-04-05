@@ -9,8 +9,9 @@
     map_pageframe_to((u64)addr, (u64)addr, false, true, MEMM_PAGE_SIZE_4K);
 
 // 这里的physical必须保证根据ps对齐
-static void map_pageframe_to(u64 target, u64 physical,
-                             bool user, bool write, memm_page_size ps)
+static void map_pageframe_to(
+    u64 target, u64 physical,
+    bool user, bool write, memm_page_size ps)
 {
     if (!is_cannonical(target))
         return;
@@ -22,7 +23,7 @@ static void map_pageframe_to(u64 target, u64 physical,
         PDPT = (u64 *)memm_entry_get_address(pml4e);
     else
     {
-        PDPT = (u64 *)(find_fitable_pages(1) * MEMM_PAGE_SIZE);
+        PDPT = memm_allcate_pagetable();
         map_pagemap(PDPT);
         memset(PDPT, 0, MEMM_PAGE_SIZE);
 
@@ -50,7 +51,7 @@ static void map_pageframe_to(u64 target, u64 physical,
         PDT = (u64 *)memm_entry_get_address(pdpte);
     else
     {
-        PDT = (u64 *)(find_fitable_pages(1) * MEMM_PAGE_SIZE);
+        PDT = memm_allcate_pagetable();
         map_pagemap(PDT);
         memset(PDT, 0, MEMM_PAGE_SIZE);
 
@@ -78,7 +79,7 @@ static void map_pageframe_to(u64 target, u64 physical,
         PT = (u64 *)memm_entry_get_address(pde);
     else
     {
-        PT = (u64 *)(find_fitable_pages(1) * MEMM_PAGE_SIZE);
+        PT = memm_allcate_pagetable();
         map_pagemap(PT);
         memset(PT, 0, MEMM_PAGE_SIZE);
 
@@ -110,7 +111,6 @@ bool memm_map_pageframes_to(
         return false;
     while (size != 0)
     {
-        // 这是当前需要映射的页的内存对齐（或者说是当前映射的页的大小）
         memm_page_size align = memm_get_page_align(physical);
         if (align == MEMM_PAGE_SIZE_1G)
         {

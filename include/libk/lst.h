@@ -33,7 +33,7 @@ bool lst_remove(lst_iterator_t *lst, usize left, usize right, bool force);
 /*
 在`lst`中添加一个线段[left,right)
 force=true时忽略已经存在于`lst`中的线段
-force=false时若有存在于`lst`中的线段，只添加这些部分之外的线段，返回false，否则返回true
+force=false时若有存在于`lst`中的线段，不添加任何线段，返回false，否则返回true
  */
 bool lst_add(lst_iterator_t *lst, usize left, usize right, bool force);
 

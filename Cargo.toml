@@ -2,6 +2,7 @@
 name = "metaverse"
 version = "0.1.0"
 edition = "2021"
+crate-type = ["staticlib"]
 
 # 此Cargo.toml仅用于rust-analyzer识别rust部分的代码
 # 不应使用cargo编译
