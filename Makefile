@@ -19,18 +19,11 @@ metaverse_kernel:
 		echo -e "\e[1;33mMetaverse\e[0m must build under \e[1;35mLinux\e[0m or itself."; \
 		exit -1; \
 	fi
-	@if [ -f "metaverse_kernel" ]; then \
-		echo; \
-	else \
-		"${SOURCE}/depcheck"; \
-		if [ $$? != 0 ]; then \
-			exit $$?; \
-		fi; \
-		touch metaverse_kernel; \
-	fi
+	@"${SOURCE}/depcheck";
 	@if [ $$? != 0 ]; then \
-		exit -1; \
+		exit $$?; \
 	fi
+	@touch metaverse_kernel
 
 disass:
 	objdump -D src/metaverse.elf > kerndisass.txt
