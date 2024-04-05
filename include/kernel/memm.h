@@ -24,11 +24,13 @@
 /**
  * @name MEMM_ALLOC_ONLY_MEMORY
  *
- * 只分配不映射空间，暂时为固定值`128MB`。物理地址`0`\~`MEMM_ALLOC_ONLY_MEMORY`的空间在进入内核前已经映射至内核空间。
+ * 只分配不映射空间，暂时为固定值`64MB`。物理地址`0`\~`MEMM_ALLOC_ONLY_MEMORY`的空间在进入内核前已经映射至内核空间。
  *
  * 这段内存空间包含**1MB以内低地址**、**内核镜像**以及未分配空间，未分配空间被一个分配器独占。
  */
-#define MEMM_ALLOC_ONLY_MEMORY (128 * 1024 * 1024)
+#define MEMM_ALLOC_ONLY_MEMORY (64 * 1024 * 1024)
+
+#define MEMM_PAGE_TABLE_AREA_MAX (4 * 1024 * 1024)
 
 /**
  * @name memm_allocate_t, memm_free_t
@@ -126,10 +128,6 @@ typedef struct __allocator_t
     // 调用分配器的`free`方法时设为`false`。
     bool full;
 
-    // 进程标志服，表示此分配器所属的进程，为0代表属于内核。
-    usize pid;
-    // 若分配器不属于内核，此成员储存此分配器的用户空间地址。
-    void *userspace;
     // 分配器类型。在目录`include/kernel/memm/allocator`中对每个分配器分别定义一个唯一值。
     usize type;
     usize size;
@@ -144,75 +142,23 @@ typedef struct __allocator_t
     u64 allocator_instance[0];
 } allocator_t;
 
-typedef struct __allocator_iterator_t
-{
-    allocator_t *allocator;
-    struct __allocator_iterator_t *left, *right;
-} allocator_iterator_t;
-
 /**
  * @name 内存管理器
  *
  * @internal alloc_only_memory
  *
  * 在进入内核主程序之前，有些不在内核中的虚拟内存空间已经被页表映射，这部分内存不可以再映射到物理页框。
- *
- * @internal mapped_page_amount
- *
- * 已经映射的页数量。若不是最小的页会被视作多个最小页计数。
- *
- * @internal mapped_4k_page, mapped_2m_page, mapped_1g_page
- * @addindex 平台依赖宏 x86_64
- *
- * 分别记录已经映射的三种大小页的数量。
- *
- * @internal page_map
- *
- * 页地图，每个bit表示对应的最小页是否被映射。
- *
- * @internal allocator_map
- *
- * 分配器地图。每个bit表示对应的最小页是否被一个分配器控制。
- *
- * @internal destructed_allocator_map
- *
- * 释放的分配器页地图。每个bit表示对应的最小页是否曾经被分配器控制并且现在控制这个页的分配器已经释放。
- *
- * 值为1的bit位对应的最小页可以直接**取消映射**、**重新构造一个分配器**、**加载可执行程序**等。
- *
- * @internal available_pages_table
- *
- * 空闲页线段搜索表。
- *
- * @internal allocators
- *
- * 分配器二叉树。
  */
 typedef struct __mem_manager_t
 {
     usize memory_size;
     usize page_amount;
 
-    // 在进入内核主程序之前，有些不在内核中的虚拟内存空间已经被页表映射，这部分内存不可以再映射到物理页框
     usize alloc_only_memory;
 
-    // 已经映射的页数量。若不是最小的页会被视作多个最小页计数。
-    usize mapped_page_amount;
-    memm_page_counter platformed_page_counter;
+    allocator_t *kernel_base_allocator;
 
-    // 页地图。每个bit都表示这个页是否被映射。
-    u8 *page_map;
-    // 分配器页地图。每个bit表示这个页是否被内存分配器控制。
-    u8 *allocator_map;
-    // 释放的分配器页地图。每个bit表示这个页是否曾经被内存分配器控制且现在被释放。
-    // 值为1的bit位对应的最小页可以直接**取消映射**、**重新构造一个分配器**、**加载可执行程序**等。
-    u8 *destructed_allocator_map;
-
-    // 空闲页线段搜索表
-    lst_iterator_t *available_pages_table;
-
-    // 分配器二叉树
-    allocator_iterator_t *allocators;
+    usize page_table_area;
 } memory_manager_t;
 
 /**
@@ -262,23 +208,6 @@ allocator_t *memm_allocator_new(void *start, usize length, usize type, usize pid
 void memm_allocator_destruct(allocator_t *allocator);
 
 /**
- * @name memm_allocate
- *
- * ```c
- * void *memm_allocate(usize size, usize pid);
- * ```
- *
- * 申请内存。`pid`为0时为内核分配。
- *
- * 所有内存在内核空间都有对物理内存空间的直接映射。
- */
-void *memm_allocate(usize size, usize pid);
-#define memm_addr_set_allocator(mem, allocator) \
-    *(allocator_t **)((void *)(mem)-16) = allocator;
-#define memm_addr_get_allocator(mem) \
-    ((*(allocator_t **)((void *)(mem)-16)))
-
-/**
  * @name memm_kernel_allocate
  *
  * ```c
@@ -288,17 +217,6 @@ void *memm_allocate(usize size, usize pid);
  * 为内核空间申请内存。
  */
 void *memm_kernel_allocate(usize size);
-
-/**
- * @name memm_user_allocate
- *
- * ```c
- * void *memm_user_allocate(usize size, usize pid);
- * ```
- *
- * 为用户空间申请内存。
- */
-void *memm_user_allocate(usize size, usize pid);
 
 /**
  * @name memm_free
@@ -311,14 +229,6 @@ void *memm_user_allocate(usize size, usize pid);
  */
 void memm_free(void *mem);
 
-/**
- * @name find_fitable_pages
- *
- * ```c
- * usize find_fitable_pages(usize page_count);
- * ```
- * 寻找大小合适的一组连续页
- */
-usize find_fitable_pages(usize page_count);
+void *memm_allcate_pagetable();
 
 #endif

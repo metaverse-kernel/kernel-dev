@@ -29,6 +29,8 @@
  */
 #define MEMM_PAGE_SIZE 4096
 
+#define MEMM_PAGE_TABLE_SIZE 4096
+
 typedef enum __memm_page_size
 {
     MEMM_PAGE_SIZE_4K = 1,      // 1个4KB页大小
