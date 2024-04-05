@@ -30,7 +30,7 @@ endif
 RSCFLAGS = --emit obj --crate-type staticlib --verbose \
 	--crate-name=metaverse \
 	--edition 2021 \
-	-L crate="${PWD}/../rustlib/${ARCH}/src/" \
+	-L crate="${PWD}/../rustlib/src/" \
 	-C code-model=large \
 	-C relocation-model=static \
 	-C embed-bitcode=no
@@ -47,7 +47,7 @@ ifeq (${ARCH},x86_64)
 	RSCFLAGS := ${RSCFLAGS} -C target-feature=-sse
 endif
 
-RUSTLIB_PATH = ../rustlib/${ARCH}/lib
+RUSTLIB_PATH = ../rustlib/${ARCH}
 RUST_LIBS = "${RUSTLIB_PATH}/liballoc.rlib" "${RUSTLIB_PATH}/libcompiler_builtins.rlib" \
 	"${RUSTLIB_PATH}/libcore.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_core.rlib"
 
