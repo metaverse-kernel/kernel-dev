@@ -37,14 +37,11 @@ RSCFLAGS = --emit obj --crate-type staticlib --verbose \
 
 ifeq (${ARCH},x86_64)
 	RSCFLAGS := ${RSCFLAGS} --target x86_64-unknown-none
+	RSCFLAGS := ${RSCFLAGS} -C target-feature=-sse
 endif
 
 ifdef release
 	RSCFLAGS := ${RSCFLAGS} -O
-endif
-
-ifeq (${ARCH},x86_64)
-	RSCFLAGS := ${RSCFLAGS} -C target-feature=-sse
 endif
 
 RUSTLIB_PATH = ../rustlib/${ARCH}
