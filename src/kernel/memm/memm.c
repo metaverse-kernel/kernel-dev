@@ -37,7 +37,6 @@ allocator_t *memm_allocator_new(void *start, usize length, usize type, usize pid
     allocator_t *allocator = start;
     allocator->magic = MEMM_ALLOCATOR_MAGIC;
     allocator->full = false;
-    allocator->pid = 0;
     allocator->size = length;
     allocator->type = type;
     switch (type)
@@ -71,10 +70,6 @@ void memm_free(void *mem)
     allocator_t *allocator = memory_manager.kernel_base_allocator;
     if (allocator->magic != MEMM_ALLOCATOR_MAGIC)
         return;
-    if (is_user_address((u64)mem))
-    {
-        mem = mem - allocator->userspace + (void *)allocator;
-    }
     allocator->free(allocator->allocator_instance, mem);
     if (allocator->full)
         allocator->full = false;
