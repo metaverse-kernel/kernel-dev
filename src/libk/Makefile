@@ -11,7 +11,7 @@ ifdef release
 	CCFLAGS := ${CCFLAGS} -O2
 endif
 
-C_SRCS = bootinfo.c lst.c
+C_SRCS = bootinfo.c lst.c utils.c
 C_OBJS = ${C_SRCS:.c=.c.o}
 
 ################################

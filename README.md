@@ -57,6 +57,8 @@ make debug
     * [x] raw_allocator
 * [x] tty
 * [x] 内核日志
+* [ ] 系统调用
+* [ ] 中断管理
 * [ ] 文件系统
   * [ ] vfs
   * [ ] fat32驱动（移植）
@@ -64,9 +66,19 @@ make debug
 * [ ] 驱动管理
 * [ ] 进程管理
 
+## 文档
+
+* 从源代码注释生成文档
+
+```bash
+make doc
+```
+
+（开发中）
+
 ## 作出贡献
 
-通过向此仓库发送PR为我们作出贡献。
+通过向此仓库发送PR为我们作出贡献，详见[contribution.md](docs/contribution.md)。
 
 ## 版权声明
 

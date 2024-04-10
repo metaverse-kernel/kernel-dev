@@ -58,8 +58,8 @@ void tty_set_framebuffer(tty *ttyx, framebuffer *fb)
     ttyx->height = ttyx->typeinfo.raw_framebuffer.height;
     if (ttyx->mode == tty_mode_text)
     {
-        ttyx->text.width = fb->width / tty_get_font()->char_width;
-        ttyx->text.height = fb->height / tty_get_font()->char_height;
+        ttyx->text.width = fb->width / (TTY_FONT_SCALE * tty_get_font()->char_width);
+        ttyx->text.height = fb->height / (TTY_FONT_SCALE * tty_get_font()->char_height);
         ttyx->text.line = 0;
         ttyx->text.column = 0;
     }
@@ -175,17 +175,20 @@ void tty_text_print(tty *ttyx, char *string, u32 color, u32 bgcolor)
         }
         else if (c == '\t')
         { // 水平制表符
+            putchar(ttyx, ' ', 0, 0);
             ttyx->text.column += 8;
             ttyx->text.column -= ttyx->text.column % 8;
             continue;
         }
         else if (c == '\r')
         { // 回到行首
+            putchar(ttyx, ' ', 0, 0);
             ttyx->text.column = 0;
             continue;
         }
         else if (c == '\v')
         { // 垂直制表符
+            putchar(ttyx, ' ', 0, 0);
             ttyx->text.line++;
             if (ttyx->text.line == ttyx->text.height)
             {

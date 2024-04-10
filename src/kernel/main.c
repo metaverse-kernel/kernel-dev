@@ -1,6 +1,8 @@
 #include <kernel/kernel.h>
 #include <kernel/tty.h>
 #include <kernel/memm.h>
+#include <kernel/interrupt.h>
+#include <kernel/syscall.h>
 
 #include <libk/multiboot2.h>
 #include <libk/math.h>
@@ -33,7 +35,7 @@ void kmain(void *mb2_bootinfo)
     }
 
     // 初始化内存管理模块
-    mem_manager_t *memm = memm_new(mem_size);
+    memory_manager_t *memm = memm_new(mem_size);
 
     // 初始化tty模块
     tty_controller_t *tty_controler = tty_controller_new();
@@ -41,6 +43,13 @@ void kmain(void *mb2_bootinfo)
     get_frame_buffer_with_bootinfo(&fb, &bootinfo);
     tty *tty0 = tty_new(tty_type_raw_framebuffer, tty_mode_text);
     tty_set_framebuffer(tty0, &fb);
+    tty_enable(tty0);
+
+    // 初始化中断管理
+    interrupt_init();
+
+    // 初始化系统调用
+    syscall_init();
 
     // 为rust准备正确对齐的栈
     prepare_stack();

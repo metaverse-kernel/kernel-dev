@@ -13,9 +13,25 @@ SECTIONS {
     {
         *(.multiboot2)
     }
-    .cpumeta :
+    .cpumeta ALIGN(4096) :
     {
         *(.cpumeta)
+    }
+    .cpumeta.tblptrs ALIGN(4096) :
+    {
+        *(cpumeta.tblptrs)
+    }
+    .cpumeta.gdt ALIGN(4096) :
+    {
+        *(.cpumeta.gdt)
+    }
+    .cpumeta.idt ALIGN(4096) :
+    {
+        *(.cpumeta.idt)
+    }
+    .cpumeta.tss ALIGN(4096) :
+    {
+        *(.cpumeta.tss)
     }
     . = 16M;
     .text :

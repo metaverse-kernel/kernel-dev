@@ -1,4 +1,3 @@
-use alloc::string::ToString;
 use alloc::vec;
 use alloc::vec::Vec;
 
@@ -140,7 +139,7 @@ impl KernelLogger {
                     return false;
                 }
             }
-            return true;
+            true
         };
         while !all_end(&indeces, &logs) {
             let mut min_ind = None;
@@ -181,7 +180,7 @@ impl<'a> Iterator for LogIterator<'a> {
         let res = if let Some((time, msg)) = self.logs.first() {
             Some(
                 MessageBuilder::new()
-                    .message(&time.to_string())
+                    .message(time)
                     .append(MessageBuilder::from_message(msg.clone()))
                     .build(),
             )

@@ -3,14 +3,25 @@
 
 #include <types.h>
 
-#define UTILS_BIT_GET(byte, bit) ((byte) & (1 << (bit)))
-#define UTILS_BIT_SET(byte, bit) ((byte) |= (1 << (bit)));
-#define UTILS_BIT_RESET(byte, bit) ((byte) &= ~(1 << (bit)));
-
-#define UTILS_BITMAP_GET(map, bit) (((u8 *)(map))[bit / 8] & (1 << ((bit) % 8)))
-#define UTILS_BITMAP_SET(map, bit) (((u8 *)(map))[bit / 8] |= (1 << ((bit) % 8)));
-#define UTILS_BITMAP_RESET(map, bit) (((u8 *)(map))[bit / 8] &= ~(1 << ((bit) % 8)));
-
 #define DISALIGNED __attribute__((packed))
+
+#define into_bytes(addr) ((u8 *)(addr))
+#define bytes_into(bytes, type) ((type *)(bytes))
+
+void pointer_to_string(u64 addr, char *dest);
+
+typedef struct __va_args
+{
+    usize length;
+    void *args[0];
+} va_args;
+
+#define va_args_gen(result, length) \
+    void *__reserved__[length];     \
+    va_args __va_args__;            \
+    result = &__va_args__;
+
+#define va_args_set(vaargs, index, val) \
+    vaargs->args[index] = &val;
 
 #endif
