@@ -2,7 +2,7 @@
 
 ARCH := $(shell uname -m)
 PWD := $(shell pwd)
-SOURCE := ${PWD}/scripts
+SOURCE := ${PWD}/../scripts
 ifeq (${ARCH},x86_64)
 	ASM = nasm
 	ASMFLAGS = -f elf64
@@ -12,9 +12,14 @@ ifdef release
 	release = 1
 endif
 
+ALLOCATOR_MAGIC = $(shell "${SOURCE}/magicgen" | sha512sum | head -c 128 | md5sum | head -c 8)
+
+BUILD_ID = $(shell "${SOURCE}/magicgen" | sha512sum | head -c 128 | md5sum | head -c 4)
+
 SUBOBJS = kernel/kernel.o libk/libk.o rust.o
 
-DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}"
+DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}" \
+	ALLOCATOR_MAGIC="${ALLOCATOR_MAGIC}" BUILD_ID="${BUILD_ID}"
 ifdef release
 	DEFINES := ${DEFINES} release=1
 endif
@@ -25,24 +30,21 @@ endif
 RSCFLAGS = --emit obj --crate-type staticlib --verbose \
 	--crate-name=metaverse \
 	--edition 2021 \
-	-L crate="${PWD}/../rustlib/${ARCH}/src/" \
+	-L crate="${PWD}/../rustlib/src/" \
 	-C code-model=large \
 	-C relocation-model=static \
 	-C embed-bitcode=no
 
 ifeq (${ARCH},x86_64)
 	RSCFLAGS := ${RSCFLAGS} --target x86_64-unknown-none
-endif
-
-ifdef release
-	RSCFLAGS := -O
-endif
-
-ifeq (${ARCH},x86_64)
 	RSCFLAGS := ${RSCFLAGS} -C target-feature=-sse
 endif
 
-RUSTLIB_PATH = ../rustlib/${ARCH}/lib
+ifdef release
+	RSCFLAGS := ${RSCFLAGS} -O
+endif
+
+RUSTLIB_PATH = ../rustlib/${ARCH}
 RUST_LIBS = "${RUSTLIB_PATH}/liballoc.rlib" "${RUSTLIB_PATH}/libcompiler_builtins.rlib" \
 	"${RUSTLIB_PATH}/libcore.rlib" "${RUSTLIB_PATH}/librustc_std_workspace_core.rlib"
 
@@ -56,6 +58,8 @@ metaverse.elf: kernel libk rust metaverse.lds
 .PHONY: kernel libk all clear postproc rust
 
 all: postproc metaverse.elf
+	@echo -e "Build \e[1;32msucceeded\e[0m."
+	@echo -e "Build ID \e[1;31m${BUILD_ID}\e[0m."
 
 postproc:
 	@echo -n -e "\e[36m"
@@ -67,16 +71,24 @@ postproc:
 	@echo -e "\e[0m"
 
 kernel:
-	@echo -e "\e[33m__\e[0m \e[1;35m[Building kernel]\e[0m \e[33m____\e[0m"
+	@if [ ! ${release} ]; then \
+		echo -e "\e[33m__\e[0m \e[1;35m[Building kernel]\e[0m \e[33m____\e[0m"; \
+	fi
 	@make -C kernel all --no-print-directory ${DEFINES}
-	@echo -e "\e[33m-------------------------\e[0m"
+	@if [ ! ${release} ]; then \
+		echo -e "\e[33m-------------------------\e[0m"; \
+	fi
 
 libk:
-	@echo -e "\e[33m__\e[0m \e[1;35m[Building libk]\e[0m \e[33m______\e[0m"
+	@if [ ! ${release} ]; then \
+		echo -e "\e[33m__\e[0m \e[1;35m[Building libk]\e[0m \e[33m______\e[0m"; \
+	fi
 	@make -C libk all --no-print-directory ${DEFINES}
-	@echo -e "\e[33m-------------------------\e[0m"
+	@if [ ! ${release} ]; then \
+		echo -e "\e[33m-------------------------\e[0m"; \
+	fi
 
-rust:
+rust: postproc
 	@echo -e "\e[1m\e[33mrustc\e[0m \e[34m-->\e[0m \e[1m\e[32m$@.o\e[0m"
 	@rustc ${RSCFLAGS} lib.rs -o rust.o
 

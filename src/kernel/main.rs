@@ -8,7 +8,6 @@ use super::{
 #[no_mangle]
 extern "C" fn kmain_rust() -> ! {
     let tty = Tty::from_id(0).unwrap();
-    tty.enable();
     let mut logger = KernelLogger::new();
     logger.info(message!(
         Msg("Hello, "),
