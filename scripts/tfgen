@@ -1,0 +1,57 @@
+#!/usr/bin/python
+
+from io import TextIOWrapper
+import sys
+import struct
+
+
+def main(infile: TextIOWrapper, outfile: TextIOWrapper):
+    size = infile.readline().strip().split(",")
+    size = (int(size[0].strip()), int(size[1].strip()))
+    outfile.write(struct.pack('q', size[0]))
+    outfile.write(struct.pack('q', size[1]))
+    for _ in range(62):
+        outfile.write(struct.pack('q', int(0)))
+    in_char = False
+    char_buffer = []
+    char_count = 0
+    for line in infile:
+        line = line.split("//")[0].strip()
+        if len(line) == 0:
+            continue
+        if line.startswith("{"):
+            char_buffer = []
+            line = line[1:]
+            in_char = True
+        if line.endswith("},"):
+            i = 0
+            for d in char_buffer:
+                outfile.write(struct.pack('q', d))
+                i += 1
+            while i < 64:
+                outfile.write(struct.pack('q', int(0)))
+                i += 1
+            char_count += 1
+            in_char = False
+            continue
+        if len(line) == 0:
+            continue
+        if in_char:
+            data = line.split(",")[0].strip()
+            data = int(data, 2)
+            char_buffer.append(data)
+    while char_count < 256:
+        for _ in range(64):
+            outfile.write(struct.pack('q', int(0)))
+        char_count += 1
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("tfgen: Input file and Output file needed.")
+        exit(1)
+    infile_name = sys.argv[1]
+    outfile_name = sys.argv[2]
+    with open(infile_name) as infile:
+        with open(outfile_name, "wb") as outfile:
+            main(infile, outfile)

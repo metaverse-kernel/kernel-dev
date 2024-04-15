@@ -12,11 +12,15 @@ ifdef release
 	release = 1
 endif
 
+ifndef ttyfont
+	ttyfont = metamono
+endif
+
 ALLOCATOR_MAGIC = $(shell "${SOURCE}/magicgen" | sha512sum | head -c 128 | md5sum | head -c 8)
 
-BUILD_ID = $(shell "${SOURCE}/magicgen" | sha512sum | head -c 128 | md5sum | head -c 4)
+BUILD_ID = $(shell "${SOURCE}/magicgen" | sha512sum | head -c 128 | md5sum | head -c 8)
 
-SUBOBJS = kernel/kernel.o libk/libk.o rust.o
+SUBOBJS = kernel/kernel.o libk/libk.o rust.o font_file.o
 
 DEFINES = ARCH="${ARCH}" ASM="${ASM}" ASMFLAGS="${ASMFLAGS}" SOURCE="${SOURCE}" PWD="${PWD}" \
 	ALLOCATOR_MAGIC="${ALLOCATOR_MAGIC}" BUILD_ID="${BUILD_ID}"
@@ -50,7 +54,7 @@ RUST_LIBS = "${RUSTLIB_PATH}/liballoc.rlib" "${RUSTLIB_PATH}/libcompiler_builtin
 
 ################################
 
-metaverse.elf: kernel libk rust metaverse.lds
+metaverse.elf: kernel libk rust metaverse.lds font_file.o
 	@echo -e "\e[1;33mld\e[0m \e[1;32m$@\e[0m \e[34m<--\e[0m \e[32m${SUBOBJS}\e[0m"
 	@ld -T metaverse.lds -Map=metaverse.map -unresolved-symbols=ignore-all -o $@ ${SUBOBJS} ${RUST_LIBS} \
 		2>&1 | "${SOURCE}/colorize" "warning:=yellow" "error:=red" "ld=lyellow"
@@ -92,7 +96,11 @@ rust: postproc
 	@echo -e "\e[1m\e[33mrustc\e[0m \e[34m-->\e[0m \e[1m\e[32m$@.o\e[0m"
 	@rustc ${RSCFLAGS} lib.rs -o rust.o
 
+font_file.o: ttyfonts/${ttyfont}.tfn
+	@"${SOURCE}/tfgen" $< font_file.tfo
+	@ld -r -b binary -o $@ font_file.tfo
+
 clear:
 	@make -C kernel clear --no-print-directory ${DEFINES}
 	@make -C libk clear --no-print-directory ${DEFINES}
-	@-rm metaverse.elf metaverse.map rust.o
+	@-rm metaverse.elf metaverse.map rust.o font_file.{o,tfo}
