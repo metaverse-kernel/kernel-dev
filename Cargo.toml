@@ -5,9 +5,7 @@ edition = "2021"
 
 [lib]
 crate-type = ["staticlib"]
+test = false
 
 # 此Cargo.toml仅用于rust-analyzer识别rust部分的代码
 # 不应使用cargo编译
-
-[target.'cfg(target_arch = "x86_64")']
-target = "x86_64-unknown-none"
