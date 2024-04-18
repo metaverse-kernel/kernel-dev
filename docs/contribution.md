@@ -12,6 +12,22 @@
 
 若你的代码通过审核，将会把你的PR合并到主分支中。
 
+## 开发引导
+
+## vscode
+
+vscode下的`rust-analyzer`插件会在`src/lib.rs`中误报`can't find crate for test`，实际上在`Cargo.toml`中已经增加了`test = false`选项。
+
+解决方法是在`.vscode/settings.json`中增加两项：
+
+```json
+"rust-analyzer.cargo.allTargets": false,
+"rust-analyzer.cargo.extraArgs": [
+  "--target",
+  "开发的目标平台的unknown-none类型目标（如x86_64-unknown-none）"
+]
+```
+
 ## 需要注意的还未解决的问题
 
 * rust中所有有关字符串格式化的宏中，出现超过一个不止是`{}`的格式化占位符时内核必然崩溃。
