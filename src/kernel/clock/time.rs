@@ -11,6 +11,7 @@ extern "C" {
 pub struct SystemTimeError(Duration);
 
 #[derive(Clone, Copy, Hash)]
+#[derive(Default)]
 pub struct SystemTime {
     unix_time: usize,
     ns_time: usize,
