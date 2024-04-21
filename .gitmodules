@@ -1,3 +1,0 @@
-[submodule "rustlib"]
-	path = rustlib
-	url = https://github.com/metaverse-kernel/rustenv.git
