@@ -5,7 +5,7 @@ use core::{
     slice,
 };
 
-use alloc::alloc::{alloc, dealloc};
+use crate::libk::alloc::alloc::{alloc, dealloc};
 
 pub struct Vec<T> {
     pointer: *mut T,
@@ -205,7 +205,12 @@ impl<T: Default> IntoIterator for Vec<T> {
     type IntoIter = VecIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        todo!()
+        VecIter {
+            pointer: self.pointer,
+            index: 0,
+            length: self.length,
+            capacity: self.capacity,
+        }
     }
 }
 

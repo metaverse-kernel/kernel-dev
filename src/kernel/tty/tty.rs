@@ -233,8 +233,8 @@ pub struct MessageBuilder {
     msg: Message,
 }
 
-pub enum BuilderFunctions<'a> {
-    Msg(&'a str),
+pub enum BuilderFunctions<T: ToString> {
+    Msg(T),
     FgColor(Color),
     BgColor(Color),
 }

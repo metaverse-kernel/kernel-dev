@@ -1,0 +1,29 @@
+======== 04-21 16:50 ========
+Hit null pointer at 0x100370a
+Stack trace:
+     1 0x0000000001007b90 -> interrupt_req_DE
+     2 0x00000000010072b0 -> metaverse::kernel::tty::tty::MessageBuilder::message_mut
+     3 0x0000000001007e60 -> <metaverse::libk::alloc::string::String as core::iter::traits::collect::FromIterator::<char>>::from_iter
+     4 0x0000000001005eb0 -> <alloc::string::String as core::iter::traits::collect::FromIterator<char>>::from_iter
+     5 0x0000000001005d80 -> <alloc::string::String as core::iter::traits::collect::Extend<char>>::extend
+     6 0x0000000001004840 -> alloc::vec::Vec::reserve
+     7 0x0000000001005900 -> alloc::raw_vec::RawVec::reserve::{do_reserve_and_handle}
+     8 0x00000000010055c0 -> alloc::raw_vec::RawVec::grow_amortized
+     9 0x00000000010051e0 -> alloc::raw_vec::finish_grow
+    10 0x0000000001005a90 -> <alloc::alloc::Global as core::alloc::Allocator>::allocate
+    11 0x0000000001004900 -> alloc::alloc::Global::alloc_impl
+    12 0x00000000010048a0 -> alloc::alloc::alloc
+    13 0x00000000010036e0 -> core::ptr::read_volatile::precondition_check
+使用了core crate中的String，导致最终调用了一个含有未正确链接的函数。
+
+======== 04-23 13:55 ========
+Hit null pointer as 0x100351a.
+Stack trace:
+    0x00000000010054d0 -> metaverse::kernel::tty::tty::MessageBuilder::message_mut
+    0x0000000001006170 -> <str as metaverse::libk::alloc::string::ToString>::to_string
+    0x0000000001006080 -> <metaverse::libk::alloc::string::String as core::iter::traits::collect::FromIterator<char>>::from_iter
+    0x0000000001007450 -> <metaverse::libk::alloc::vec::Vec as core::iter::traits::collect::FromIterator>::from_iter
+    0x0000000001006a10 -> metaverse::libk::alloc::vec::Vec::push
+    0x0000000001003f60 -> alloc::alloc::alloc
+    0x00000000010034f0 -> core::ptr::read_volatile::precondition_check
+使用了core crate的alloc函数，其中含有未正确链接的函数。

@@ -5,7 +5,7 @@ use core::{
     ptr::addr_of,
 };
 
-use alloc::alloc::alloc;
+use crate::libk::alloc::alloc::{alloc, dealloc};
 
 pub struct Box<T: ?Sized> {
     inner: *mut T,
@@ -34,5 +34,16 @@ impl<T: ?Sized> Deref for Box<T> {
 impl<T: ?Sized> DerefMut for Box<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { self.inner.as_mut().unwrap() }
+    }
+}
+
+impl<T: ?Sized> Drop for Box<T> {
+    fn drop(&mut self) {
+        unsafe {
+            dealloc(
+                self.inner.cast(),
+                Layout::for_value_raw(self.inner.cast_const()),
+            )
+        }
     }
 }

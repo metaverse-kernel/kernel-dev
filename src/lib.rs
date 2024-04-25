@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(strict_provenance)]
+#![feature(layout_for_ptr)]
 
 extern crate alloc;
 

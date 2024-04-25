@@ -6,9 +6,9 @@ use core::{
 };
 
 extern "C" {
-    pub fn memm_kernel_allocate(size: usize) -> *mut u8;
+    fn memm_kernel_allocate(size: usize) -> *mut u8;
     // pub fn memm_user_allocate(size: usize, pid: usize);
-    pub fn memm_free(mem: *mut u8);
+    fn memm_free(mem: *mut u8);
 }
 
 pub struct KernelAllocator {}
@@ -31,4 +31,4 @@ unsafe impl GlobalAlloc for KernelAllocator {
 }
 
 #[global_allocator]
-static KERNEL_ALLOCATOR: KernelAllocator = KernelAllocator {};
+pub static KERNEL_ALLOCATOR: KernelAllocator = KernelAllocator {};

@@ -1,1 +1,1 @@
-mod memm;
+pub mod memm;
