@@ -51,7 +51,10 @@
     add rsp, 4
 %endmacro
 
+; 此处的cli在进入rust的中断处理函数后才会对应sti
+; 因为在保存栈帧前中断不可以被打断
 %macro interrupt_entry_enter 0
+    cli
     push rbp
     lea rbp, [rsp]
     store_regs
@@ -62,6 +65,7 @@
     retrieve_section
     retrieve_regs
     leave
+    sti
 %endmacro
 
 ; 用于带有错误码的中断，创建一个没有错误码的上下文拷贝
