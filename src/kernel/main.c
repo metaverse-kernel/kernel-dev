@@ -48,6 +48,8 @@ void kmain(void *mb2_bootinfo)
     // 初始化中断管理
     interrupt_init();
 
+    int i = 1 / 0;
+
     // 初始化系统调用
     syscall_init();
 

@@ -13,8 +13,7 @@ ifdef release
 	CCFLAGS := ${CCFLAGS} -O2
 endif
 
-C_SRCS = main.c tty.c font.c memm.c memm_${ARCH}.c raw.c time.c syscall_${ARCH}.c interrupt_${ARCH}.c \
-	interrupt_procs.c
+C_SRCS = main.c tty.c font.c memm.c memm_${ARCH}.c raw.c time.c syscall_${ARCH}.c interrupt_${ARCH}.c
 C_OBJS = ${C_SRCS:.c=.c.o}
 
 ################################

@@ -77,7 +77,7 @@ interrupt_entry_DE:
     interrupt_entry_leave
     iret
 
-    global interrupt_entry_DE
+    global interrupt_entry_NMI
 interrupt_entry_NMI:
     ; TODO 暂时不需要为这个中断实现任何功能
     iret
@@ -92,6 +92,18 @@ interrupt_entry_BP:
     mov dword [rsp + 4], 0
     mov rdx, rsp
     call interrupt_req_BP
+
+    interrupt_entry_leave
+    iret
+
+    global interrupt_entry_OF
+    extern interrupt_req_OF
+interrupt_entry_OF:
+    interrupt_entry_enter
+
+    mov rdi, [rsp + 128]
+    mov rsi, [rsp + 152]
+    call interrupt_req_OF
 
     interrupt_entry_leave
     iret
