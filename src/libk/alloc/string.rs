@@ -2,7 +2,7 @@ use core::ops::{Add, AddAssign};
 
 use super::vec::{Vec, VecIterator};
 
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct String {
     data: Vec<char>,
     u8data: Vec<u8>,
@@ -75,6 +75,15 @@ impl AddAssign for String {
     }
 }
 
+impl Clone for String {
+    fn clone(&self) -> Self {
+        Self {
+            data: self.data.clone(),
+            u8data: self.u8data.clone(),
+        }
+    }
+}
+
 pub trait ToString {
     fn to_string(&self) -> String;
     fn to_octal_string(&self) -> String {
@@ -129,7 +138,7 @@ impl ToString for u8 {
         let mut num = *self;
         let mut res = String::new();
         while num != 0 {
-            res.insert(0, (tohex(num % 16) + b'0') as char);
+            res.insert(0, tohex(num % 16) as char);
             num /= 16;
         }
         res
@@ -144,6 +153,9 @@ impl ToString for u16 {
             res.insert(0, ((num % 10) as u8 + b'0') as char);
             num /= 10;
         }
+        if res.len() == 0 {
+            res.insert(0, '0');
+        }
         res
     }
 
@@ -153,6 +165,9 @@ impl ToString for u16 {
         while num != 0 {
             res.insert(0, ((num % 8) as u8 + b'0') as char);
             num /= 8;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
         }
         res
     }
@@ -168,12 +183,16 @@ impl ToString for u16 {
         let mut num = *self;
         let mut res = String::new();
         while num != 0 {
-            res.insert(0, (tohex(num % 16) + b'0') as char);
+            res.insert(0, tohex(num % 16) as char);
             num /= 16;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
         }
         res
     }
 }
+
 impl ToString for u32 {
     fn to_string(&self) -> String {
         let mut num = *self;
@@ -182,6 +201,9 @@ impl ToString for u32 {
             res.insert(0, ((num % 10) as u8 + b'0') as char);
             num /= 10;
         }
+        if res.len() == 0 {
+            res.insert(0, '0');
+        }
         res
     }
 
@@ -191,6 +213,9 @@ impl ToString for u32 {
         while num != 0 {
             res.insert(0, ((num % 8) as u8 + b'0') as char);
             num /= 8;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
         }
         res
     }
@@ -206,12 +231,16 @@ impl ToString for u32 {
         let mut num = *self;
         let mut res = String::new();
         while num != 0 {
-            res.insert(0, (tohex(num % 16) + b'0') as char);
+            res.insert(0, tohex(num % 16) as char);
             num /= 16;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
         }
         res
     }
 }
+
 impl ToString for u64 {
     fn to_string(&self) -> String {
         let mut num = *self;
@@ -220,6 +249,9 @@ impl ToString for u64 {
             res.insert(0, ((num % 10) as u8 + b'0') as char);
             num /= 10;
         }
+        if res.len() == 0 {
+            res.insert(0, '0');
+        }
         res
     }
 
@@ -229,6 +261,9 @@ impl ToString for u64 {
         while num != 0 {
             res.insert(0, ((num % 8) as u8 + b'0') as char);
             num /= 8;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
         }
         res
     }
@@ -244,12 +279,16 @@ impl ToString for u64 {
         let mut num = *self;
         let mut res = String::new();
         while num != 0 {
-            res.insert(0, (tohex(num % 16) + b'0') as char);
+            res.insert(0, tohex(num % 16) as char);
             num /= 16;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
         }
         res
     }
 }
+
 impl ToString for u128 {
     fn to_string(&self) -> String {
         let mut num = *self;
@@ -258,6 +297,9 @@ impl ToString for u128 {
             res.insert(0, ((num % 10) as u8 + b'0') as char);
             num /= 10;
         }
+        if res.len() == 0 {
+            res.insert(0, '0');
+        }
         res
     }
 
@@ -267,6 +309,9 @@ impl ToString for u128 {
         while num != 0 {
             res.insert(0, ((num % 8) as u8 + b'0') as char);
             num /= 8;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
         }
         res
     }
@@ -282,8 +327,59 @@ impl ToString for u128 {
         let mut num = *self;
         let mut res = String::new();
         while num != 0 {
-            res.insert(0, (tohex(num % 16) + b'0') as char);
+            res.insert(0, tohex(num % 16) as char);
             num /= 16;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
+        }
+        res
+    }
+}
+
+impl ToString for usize {
+    fn to_string(&self) -> String {
+        let mut num = *self;
+        let mut res = String::new();
+        while num != 0 {
+            res.insert(0, ((num % 10) as u8 + b'0') as char);
+            num /= 10;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
+        }
+        res
+    }
+
+    fn to_octal_string(&self) -> String {
+        let mut num = *self;
+        let mut res = String::new();
+        while num != 0 {
+            res.insert(0, ((num % 8) as u8 + b'0') as char);
+            num /= 8;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
+        }
+        res
+    }
+
+    fn to_hex_string(&self) -> String {
+        let tohex = |x| {
+            if x < 10 {
+                x as u8 + b'0'
+            } else {
+                x as u8 - 10 + b'a'
+            }
+        };
+        let mut num = *self;
+        let mut res = String::new();
+        while num != 0 {
+            res.insert(0, tohex(num % 16) as char);
+            num /= 16;
+        }
+        if res.len() == 0 {
+            res.insert(0, '0');
         }
         res
     }

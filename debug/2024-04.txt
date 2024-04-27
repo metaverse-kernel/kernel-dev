@@ -17,7 +17,7 @@ Stack trace:
 使用了core crate中的String，导致最终调用了一个含有未正确链接的函数。
 
 ======== 04-23 13:55 ========
-Hit null pointer as 0x100351a.
+Hit null pointer at 0x100351a.
 Stack trace:
     0x00000000010054d0 -> metaverse::kernel::tty::tty::MessageBuilder::message_mut
     0x0000000001006170 -> <str as metaverse::libk::alloc::string::ToString>::to_string
@@ -27,3 +27,29 @@ Stack trace:
     0x0000000001003f60 -> alloc::alloc::alloc
     0x00000000010034f0 -> core::ptr::read_volatile::precondition_check
 使用了core crate的alloc函数，其中含有未正确链接的函数。
+
+======== 04-26 02:56 ========
+Hit null pointer in metaverse::libk::alloc::string::String::clone()
+Stack trace:
+    0x0000000001005520 -> metaverse::kernel::tty::tty::format_message
+    0x00000000010052f0 -> metaverse::kernel::tty::tty::MessageBuilder::message_mut
+    0x00000000010073f0 -> <metaverse::libk::alloc::string::String as metaverse::libk::alloc::string::ToString>::to_string
+    0x0000000001009a90 -> <metaverse::libk::alloc::string::String as core::clone::Clone>::clone
+使用了Clone的derive宏，含有未正确链接的函数。
+
+======== 04-26 15:55 ========
+Hit null pointer at 0x1003672.
+Stack trace:
+    0x0000000001007600 -> <u64 as metaverse::libk::alloc::string::ToString>::to_string
+    0x0000000001007030 -> metaverse::libk::alloc::string::String::insert
+    0x0000000001008330 -> metaverse::libk::alloc::vec::Vec::insert
+    0x0000000001007950 -> metaverse::libk::alloc::vec::Vec::extend_capacity
+    0x0000000001003630 -> core::intrinsics::copy::precondition_check
+将*mut u8转换为*mut T时调用了此函数，导致调用了一个未正确链接的函数。
+
+======== 04-27 16:06 ========
+Trapped into a infinite loop.
+Stack trace:
+    0x0000000001006c30 -> interrupt_req_DE
+    0x0000000001005420 -> metaverse::kernel::tty::tty::MessageBuilder::append
+    0x0000000001008410 -> metaverse::libk::alloc::vec::Vec::append

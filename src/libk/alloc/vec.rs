@@ -1,11 +1,14 @@
 use core::{
     alloc::Layout,
     ops::{Index, IndexMut, Range, RangeFull},
-    ptr::{addr_of_mut, null_mut},
+    ptr::addr_of_mut,
     slice,
 };
 
-use crate::libk::alloc::alloc::{alloc, dealloc};
+use crate::libk::{
+    alloc::alloc::{alloc, dealloc},
+    core::ptr::PtrOptions,
+};
 
 pub struct Vec<T> {
     pointer: *mut T,
@@ -16,15 +19,15 @@ pub struct Vec<T> {
 impl<T: Default> Vec<T> {
     pub fn new() -> Self {
         Self {
-            pointer: null_mut(),
+            pointer: unsafe { alloc(Layout::array::<T>(4).unwrap()).cast() },
             length: 0,
-            capacity: 0,
+            capacity: 4,
         }
     }
 
     unsafe fn extend_capacity(&mut self) {
-        let newp = alloc(Layout::array::<T>(self.capacity * 2).unwrap()).cast();
-        self.pointer.copy_to(newp, self.length);
+        let newp: *mut T = alloc(Layout::array::<T>(self.capacity * 2).unwrap()).cast();
+        self.pointer.kcopy_to(newp, self.length);
         dealloc(
             self.pointer.cast(),
             Layout::array::<T>(self.capacity).unwrap(),
@@ -34,11 +37,6 @@ impl<T: Default> Vec<T> {
     }
 
     pub fn push(&mut self, item: T) {
-        if self.pointer.is_null() {
-            self.pointer = unsafe { alloc(Layout::array::<T>(4).unwrap()).cast() };
-            self.capacity = 4;
-            self.length = 0;
-        }
         if self.capacity == self.length {
             unsafe { self.extend_capacity() }
         }
@@ -54,11 +52,11 @@ impl<T: Default> Vec<T> {
         unsafe {
             if rearlen != 0 {
                 let tmp = alloc(Layout::array::<T>(rearlen).unwrap()).cast();
-                self.pointer.offset(index as isize).copy_to(tmp, rearlen);
+                self.pointer.offset(index as isize).kcopy_to(tmp, rearlen);
                 self.pointer.offset(index as isize).write(item);
                 self.pointer
                     .offset(index as isize + 1)
-                    .copy_from(tmp, rearlen);
+                    .kcopy_from(tmp, rearlen);
             } else {
                 self.pointer.offset(self.length as isize).write(item);
             }
@@ -73,7 +71,7 @@ impl<T: Default> Vec<T> {
         unsafe {
             self.pointer
                 .offset(self.length as isize)
-                .copy_from(v.pointer.cast_const(), v.length)
+                .kcopy_from(v.pointer.cast_const(), v.length)
         };
         self.length += v.length;
     }
@@ -108,8 +106,8 @@ impl<T: Default> Vec<T> {
         let mut t: T = T::default();
         let pt = addr_of_mut!(t);
         unsafe {
-            pt.copy_from(self.pointer.offset(index as isize).cast_const(), 1);
-            self.pointer.offset(index as isize).copy_from(
+            pt.kcopy_from(self.pointer.offset(index as isize).cast_const(), 1);
+            self.pointer.offset(index as isize).kcopy_from(
                 self.pointer.offset(index as isize + 1),
                 self.length - index - 1,
             );
@@ -172,7 +170,7 @@ impl<T: Default> Clone for Vec<T> {
         };
         unsafe {
             res.pointer
-                .copy_from(self.pointer.cast_const(), self.length)
+                .kcopy_from(self.pointer.cast_const(), self.length)
         };
         res
     }
@@ -264,7 +262,7 @@ impl<T: Default> Iterator for VecIter<T> {
             let res = unsafe {
                 self.pointer
                     .offset(self.index as isize)
-                    .copy_to(addr_of_mut!(t), 1);
+                    .kcopy_to(addr_of_mut!(t), 1);
                 Some(t)
             };
             self.index += 1;
