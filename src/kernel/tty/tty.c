@@ -77,6 +77,7 @@ inline static void scroll_buffer(
     usize dist)
 {
     memcpy(buffer, buffer + width * pixsize * dist, (height - dist) * width * pixsize);
+    memset(buffer + (height - dist) * width * pixsize, 0, dist * width * pixsize);
 }
 
 inline static void putchar(
