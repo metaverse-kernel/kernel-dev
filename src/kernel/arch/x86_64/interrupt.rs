@@ -13,15 +13,11 @@ unsafe extern "C" fn interrupt_req_UNSUPPORTED(rip: u64, rsp: u64, errcode: u64)
     interrupt_rust_enter();
     let tty = Tty::from_id(0).unwrap();
     tty.enable();
-    let msg = message_raw!(
-        Msg("Panic:"),
-        FgColor::<u8>(Color::RED),
-        Msg(" Kernel hit an unsupported interrupt\n\twith %rip=0x"),
-        Msg(rip.to_hex_string()),
-        Msg(" and %rsp=0x"),
-        Msg(rsp.to_hex_string())
-    );
-    tty.print(msg);
+    tty.print(message!(
+        "{Panic}: Kernel hit an {Unsupported} interrupt. \n",
+        FmtMeta::Color(Color::RED),
+        FmtMeta::Color(Color::YELLOW)
+    ));
     loop {}
 }
 
@@ -31,11 +27,12 @@ unsafe extern "C" fn interrupt_req_DE(rip: u64, rsp: u64, errcode: u64) {
     let tty = Tty::from_id(0).unwrap();
     tty.enable();
     tty.print(message!(
-        "{Panic}: divided by zero. rip=0x{}.\n",
+        "{Panic}: Kernel hit {Divid Error} on rip=0x{} and rsp=0x{}.\n",
         FmtMeta::Color(Color::RED),
-        FmtMeta::Pointer(rip as usize)
+        FmtMeta::Color(Color::YELLOW),
+        FmtMeta::Pointer(rip as usize),
+        FmtMeta::Pointer(rsp as usize)
     ));
-    loop {}
     interrupt_rust_leave();
 }
 

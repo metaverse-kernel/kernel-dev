@@ -47,6 +47,12 @@ macro_rules! message_raw {
 
 #[macro_export]
 macro_rules! message {
+    ( $fmtter : expr ) => {{
+        use crate::kernel::tty::tty::MessageBuilder;
+        MessageBuilder::new()
+            .message($fmtter)
+            .build()
+    }};
     ( $fmtter : expr, $( $e : expr ),* ) => {{
         use crate::{
             kernel::tty::tty::{
