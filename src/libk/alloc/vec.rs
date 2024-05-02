@@ -112,6 +112,7 @@ impl<T: Default> Vec<T> {
                 self.length - index - 1,
             );
         }
+        self.length -= 1;
         t
     }
 
