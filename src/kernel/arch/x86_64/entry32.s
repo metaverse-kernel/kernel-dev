@@ -21,17 +21,18 @@ init32:
     mov dword [edi], 0
 
     ; 设置PD0中的PDE
-    mov ecx, 64
+    ; 以2MB页映射前64MB
+    mov ecx, 32
     mov eax, 0
     mov edi, 0x103000   ; PD0
     init32_loop0:
         mov edx, eax
         add edx, 0x183
         mov dword [edi], edx
-        add eax, 0x200000   ; 2MB
         add edi, 4
         mov dword [edi], 0
         add edi, 4
+        add eax, 0x200000   ; 2MB
     loop init32_loop0
 
     ; 加载GDTR、段寄存器和TR寄存器

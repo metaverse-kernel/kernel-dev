@@ -1,8 +1,8 @@
 use core::ptr::null_mut;
 
-use alloc::{
+use crate::libk::alloc::{
+    boxed::Box,
     string::{String, ToString},
-    vec,
     vec::Vec,
 };
 
@@ -141,7 +141,7 @@ impl Tty {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct Color(pub u8, pub u8, pub u8);
 
 impl Color {
@@ -169,7 +169,7 @@ pub struct Resolution {
     pub height: usize,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct MessageSection {
     msg: String,
     fgcolor: Color,
@@ -179,14 +179,14 @@ pub struct MessageSection {
 /// ## Message
 ///
 /// 用`MessageBuilder`构造一个`Message`对象
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Message(Vec<MessageSection>);
 
 impl ToString for Message {
     fn to_string(&self) -> String {
         let mut res = String::new();
         for MessageSection { msg, .. } in self.0.iter() {
-            res += msg;
+            res += msg.clone();
         }
         res
     }
@@ -212,7 +212,7 @@ impl ToString for Message {
 /// ```rust
 /// use crate::kernel::tty::tty::BuilderFunctions::*;
 ///
-/// message!(
+/// message_raw!(
 ///     Msg("Hello, "),
 ///     Msg("Metaverse"),
 ///     FgColor(Color::GREEN),
@@ -233,8 +233,8 @@ pub struct MessageBuilder {
     msg: Message,
 }
 
-pub enum BuilderFunctions<'a> {
-    Msg(&'a str),
+pub enum BuilderFunctions<T: ToString> {
+    Msg(T),
     FgColor(Color),
     BgColor(Color),
 }
@@ -242,8 +242,12 @@ pub enum BuilderFunctions<'a> {
 impl MessageBuilder {
     pub fn new() -> Self {
         Self {
-            msg: Message(vec![]),
+            msg: Message(Vec::new()),
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.msg.0.is_empty()
     }
 
     pub fn from_message(msg: Message) -> Self {
@@ -301,4 +305,83 @@ impl MessageBuilder {
     pub fn build(self) -> Message {
         self.msg
     }
+}
+
+pub enum FmtMeta {
+    Color(Color),
+    String(String),
+    ToStringable(Box<dyn ToString>),
+    Hex(u8),
+    Pointer(usize),
+}
+
+pub fn format_message(fmt: &mut Vec<char>, meta: FmtMeta) -> MessageBuilder {
+    let mut msgbuilder = MessageBuilder::new();
+    let mut fmt_start = None;
+    let mut fmt_end = None;
+    for i in 0..fmt.len() {
+        if fmt[i] == '{' {
+            fmt_start = Some(i);
+        }
+        if fmt[i] == '}' {
+            fmt_end = Some(i);
+            break;
+        }
+    }
+    let tohex = |n: u8| {
+        if n < 10 {
+            (b'0' + n) as char
+        } else {
+            (b'a' + n - 10) as char
+        }
+    };
+    if fmt_start == None || fmt_end == None {
+        msgbuilder.message_mut(&String::from_iter(fmt.iter()));
+    } else {
+        let fmt_start = fmt_start.unwrap();
+        let fmt_end = fmt_end.unwrap();
+        let mut formatter = Vec::new();
+        for _ in fmt_start..=fmt_end {
+            formatter.push(fmt.remove(fmt_start));
+        }
+        formatter.remove(formatter.len() - 1);
+        formatter.remove(0);
+        match meta {
+            FmtMeta::Color(color) => {
+                let first = fmt.split_at(fmt_start).0;
+                msgbuilder.message_mut(&String::from_iter(first.iter()));
+                for _ in 0..fmt_start {
+                    fmt.remove(0);
+                }
+                msgbuilder.message_mut(&String::from_iter(formatter.iter()));
+                msgbuilder.foreground_color_mut(color);
+            }
+            FmtMeta::String(s) => {
+                for c in s.chars().rev() {
+                    fmt.insert(fmt_start, *c);
+                }
+            }
+            FmtMeta::ToStringable(s) => {
+                for c in s.to_string().chars().rev() {
+                    fmt.insert(fmt_start, *c);
+                }
+            }
+            FmtMeta::Hex(num) => {
+                fmt.insert(fmt_start, tohex(num >> 4));
+                fmt.insert(fmt_start, tohex(num & 0xf));
+            }
+            FmtMeta::Pointer(mut p) => {
+                for _ in 0..16 {
+                    fmt.insert(fmt_start, tohex((p & 0xf) as u8));
+                    p >>= 4;
+                }
+            }
+        }
+    }
+    let mut rests = Vec::new();
+    while !fmt.is_empty() && fmt[0] != '{' {
+        rests.push(fmt.remove(0));
+    }
+    msgbuilder.message_mut(&String::from_iter(rests.iter()));
+    msgbuilder
 }

@@ -20,6 +20,8 @@ void interrupt_init()
     interrupt_register_gate(gate, 2);
     trap_gate_generate(gate, interrupt_entry_sym(BP));
     interrupt_register_gate(gate, 3);
+    trap_gate_generate(gate, interrupt_entry_sym(OF));
+    interrupt_register_gate(gate, 4);
 
     interrupt_open();
 }

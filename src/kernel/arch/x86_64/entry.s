@@ -11,7 +11,8 @@ init64:
     mov rsp, rax
     mov rdi, rbx
 
-    lidt [0x104010]
+    ; 加载idt
+    lidt [0x104010]     ; idt_ptr
 
     ; 加载系统调用相关寄存器
     ; IA32_STAR = 0x0018_0008_0000_0000

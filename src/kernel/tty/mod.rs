@@ -1,46 +1,28 @@
 pub mod tty;
 
 #[macro_export]
-macro_rules! message_msg {
-    () => {};
-    ( $builder : expr, $e : expr) => {
-        $builder.message_mut($e);
-    };
-}
-
-#[macro_export]
-macro_rules! message_fgc {
-    () => {};
-    ( $builder : expr, $e : expr) => {
-        $builder.foreground_color_mut($e);
-    };
-}
-
-#[macro_export]
-macro_rules! message_bgc {
-    () => {};
-    ( $builder : expr, $e : expr ) => {
-        $builder.background_color_mut($e);
-    };
-}
-
-#[macro_export]
 macro_rules! message {
-    ( $( $e : expr ),* ) => {{
+    ( $fmtter : expr ) => {{
+        use crate::kernel::tty::tty::MessageBuilder;
+        MessageBuilder::new()
+            .message($fmtter)
+            .build()
+    }};
+    ( $fmtter : expr, $( $e : expr ),* ) => {{
         use crate::{
-            kernel::tty::tty::{MessageBuilder, BuilderFunctions},
-            message_msg, message_fgc, message_bgc
+            kernel::tty::tty::{
+                MessageBuilder,
+                FmtMeta,
+                Color,
+                format_message
+            },
+            libk::alloc::vec::Vec,
         };
-        let mut tmp_builder = MessageBuilder::new();
+        let mut formatter = $fmtter.chars().collect::<Vec<char>>();
+        let builder = MessageBuilder::new();
         $(
-            if let BuilderFunctions::Msg(e) = $e {
-                message_msg!(tmp_builder, e);
-            } else if let BuilderFunctions::FgColor(c) = $e {
-                message_fgc!(tmp_builder, c);
-            } else if let BuilderFunctions::BgColor(c) = $e {
-                message_bgc!(tmp_builder, c);
-            }
+            let builder = builder.append(format_message(&mut formatter, $e));
         )*
-        tmp_builder.build()
+        builder.build()
     }};
 }

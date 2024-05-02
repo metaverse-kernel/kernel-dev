@@ -1,1 +1,2 @@
-pub mod string;
+pub mod alloc;
+pub mod core;

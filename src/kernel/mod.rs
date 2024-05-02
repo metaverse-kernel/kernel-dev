@@ -3,4 +3,4 @@ pub mod klog;
 pub mod main;
 pub mod memm;
 pub mod tty;
-pub mod sync;
+pub mod arch;

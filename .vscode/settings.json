@@ -1,9 +1,0 @@
-{
-    "C_Cpp.errorSquiggles": "disabled",
-    "files.associations": {
-        "*.s": "nasm",
-        "LICENCE": "plaintext",
-        "*.h": "c"
-    },
-    "rust-analyzer.imports.preferNoStd" : true,
-}

@@ -1,3 +1,0 @@
-[submodule "rustlib"]
-	path = rustlib
-	url = http://git.suthby.org:2024/metaverse/rustenv

@@ -156,6 +156,7 @@ void tty_disable(tty *ttyx);
 
 typedef struct __tty_font_t
 {
+    bool initialized;
     u16 char_width, char_height;
     u64 **font;
 } tty_font_t;

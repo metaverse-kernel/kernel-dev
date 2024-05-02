@@ -46,13 +46,13 @@ typedef void (*interrupt_entry)();
 /**
  * @name interrupt_request
  * @addindex 平台定制函数
- * 
+ *
  * 中断请求处理程序。
- * 
+ *
  * ```c
  * void interrupt_request(u64 rip, u64 rsp);
  * ```
- * 
+ *
  * 由中断入口程序调用。
  */
 typedef void (*interrupt_request)(u64 rip, u64 rsp, u64 errcode);
@@ -77,11 +77,13 @@ typedef void (*interrupt_request)(u64 rip, u64 rsp, u64 errcode);
 #define DE
 #define NMI
 #define BP
+#define OF
 
 interrupt_entry_gen(UNSUPPORTED);
 
-interrupt_entry_gen(DE);
-interrupt_entry_gen(NMI);
-interrupt_entry_gen(BP);
+interrupt_entry_gen(DE);  // irq0
+interrupt_entry_gen(NMI); // irq2
+interrupt_entry_gen(BP);  // irq3
+interrupt_entry_gen(OF);  // ira4
 
 #endif

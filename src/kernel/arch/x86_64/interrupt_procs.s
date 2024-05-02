@@ -63,7 +63,7 @@ interrupt_entry_UNSUPPORTED:
     call interrupt_req_UNSUPPORTED
 
     interrupt_entry_leave
-    iret
+    iretq
 
     global interrupt_entry_DE
     extern interrupt_req_DE
@@ -75,12 +75,12 @@ interrupt_entry_DE:
     call interrupt_req_DE
 
     interrupt_entry_leave
-    iret
+    iretq
 
-    global interrupt_entry_DE
+    global interrupt_entry_NMI
 interrupt_entry_NMI:
     ; TODO 暂时不需要为这个中断实现任何功能
-    iret
+    iretq
 
     global interrupt_entry_BP
     extern interrupt_req_BP
@@ -94,4 +94,16 @@ interrupt_entry_BP:
     call interrupt_req_BP
 
     interrupt_entry_leave
-    iret
+    iretq
+
+    global interrupt_entry_OF
+    extern interrupt_req_OF
+interrupt_entry_OF:
+    interrupt_entry_enter
+
+    mov rdi, [rsp + 128]
+    mov rsi, [rsp + 152]
+    call interrupt_req_OF
+
+    interrupt_entry_leave
+    iretq

@@ -1,5 +1,4 @@
-use alloc::vec;
-use alloc::vec::Vec;
+use crate::libk::alloc::vec::Vec;
 
 use super::{
     clock::time::SystemTime,
@@ -28,12 +27,12 @@ pub struct KernelLogger {
 impl KernelLogger {
     pub fn new() -> Self {
         Self {
-            fatal_queue: vec![],
-            error_queue: vec![],
-            warning_queue: vec![],
-            info_queue: vec![],
-            debug_queue: vec![],
-            trace_queue: vec![],
+            fatal_queue: Vec::new(),
+            error_queue: Vec::new(),
+            warning_queue: Vec::new(),
+            info_queue: Vec::new(),
+            debug_queue: Vec::new(),
+            trace_queue: Vec::new(),
         }
     }
 
@@ -91,105 +90,18 @@ impl KernelLogger {
         self.trace_queue.push((SystemTime::now(), msg));
     }
 
-    pub fn iter(&self, level: LoggerLevel) -> LogIterator {
-        let mut logs = vec![];
-        match level {
-            LoggerLevel::Fatal => {
-                logs.push(&self.fatal_queue);
-            }
-            LoggerLevel::Error => {
-                logs.push(&self.fatal_queue);
-                logs.push(&self.error_queue);
-            }
-            LoggerLevel::Warning => {
-                logs.push(&self.fatal_queue);
-                logs.push(&self.error_queue);
-                logs.push(&self.warning_queue);
-            }
-            LoggerLevel::Info => {
-                logs.push(&self.fatal_queue);
-                logs.push(&self.error_queue);
-                logs.push(&self.warning_queue);
-                logs.push(&self.info_queue);
-            }
-            LoggerLevel::Debug => {
-                logs.push(&self.fatal_queue);
-                logs.push(&self.error_queue);
-                logs.push(&self.warning_queue);
-                logs.push(&self.info_queue);
-                logs.push(&self.debug_queue);
-            }
-            LoggerLevel::Trace => {
-                logs.push(&self.fatal_queue);
-                logs.push(&self.error_queue);
-                logs.push(&self.warning_queue);
-                logs.push(&self.info_queue);
-                logs.push(&self.debug_queue);
-                logs.push(&self.trace_queue);
-            }
-        }
-        let mut res = vec![];
-        let mut indeces = Vec::new();
-        for _ in 0..logs.len() {
-            indeces.push(0usize);
-        }
-        let all_end = |indeces: &Vec<usize>, logs: &Vec<&Vec<(SystemTime, Message)>>| {
-            for i in 0..indeces.len() {
-                if indeces[i] < logs.len() {
-                    return false;
-                }
-            }
-            true
-        };
-        while !all_end(&indeces, &logs) {
-            let mut min_ind = None;
-            let mut min = None;
-            for i in 0..indeces.len() {
-                if indeces[i] >= logs[i].len() {
-                    continue;
-                }
-                if let Some(minx) = min.as_mut() {
-                    if logs[i][indeces[i]].0 < *minx {
-                        *minx = logs[i][indeces[i]].0;
-                        min_ind = Some(i);
-                    }
-                } else {
-                    min = Some(logs[i][indeces[i]].0);
-                    min_ind = Some(i);
-                }
-            }
-            if let Some(mini) = min_ind {
-                res.push(&logs[mini][indeces[mini]]);
-                indeces[mini] += 1;
-            } else {
-                break;
-            }
-        }
-        LogIterator { logs: res }
+    pub fn iter(&self, _level: LoggerLevel) -> LogIterator {
+        todo!()
     }
 }
 
-pub struct LogIterator<'a> {
-    logs: Vec<&'a (SystemTime, Message)>,
+pub struct LogIterator {
 }
 
-impl<'a> Iterator for LogIterator<'a> {
+impl Iterator for LogIterator {
     type Item = Message;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let res = if let Some((time, msg)) = self.logs.first() {
-            Some(
-                MessageBuilder::new()
-                    .message(time)
-                    .append(MessageBuilder::from_message(msg.clone()))
-                    .build(),
-            )
-        } else {
-            None
-        };
-        if let Some(_) = res {
-            self.logs.remove(0);
-        }
-        res
+        todo!()
     }
 }
