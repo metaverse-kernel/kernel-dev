@@ -1,4 +1,4 @@
-use crate::{kernel::tty::tty::Tty, libk::alloc::string::ToString, message, message_raw};
+use crate::{kernel::tty::tty::Tty, message};
 
 extern "C" {
     pub fn interrupt_open();
@@ -14,9 +14,11 @@ unsafe extern "C" fn interrupt_req_UNSUPPORTED(rip: u64, rsp: u64, errcode: u64)
     let tty = Tty::from_id(0).unwrap();
     tty.enable();
     tty.print(message!(
-        "{Panic}: Kernel hit an {Unsupported} interrupt. \n",
+        "{Panic}: Kernel hit an {Unsupported} interrupt on rip=0x{} and rsp=0x{}.\n",
         FmtMeta::Color(Color::RED),
-        FmtMeta::Color(Color::YELLOW)
+        FmtMeta::Color(Color::YELLOW),
+        FmtMeta::Pointer(rip as usize),
+        FmtMeta::Pointer(rsp as usize)
     ));
     loop {}
 }
@@ -27,8 +29,8 @@ unsafe extern "C" fn interrupt_req_DE(rip: u64, rsp: u64, errcode: u64) {
     let tty = Tty::from_id(0).unwrap();
     tty.enable();
     tty.print(message!(
-        "{Panic}: Kernel hit {Divid Error} on rip=0x{} and rsp=0x{}.\n",
-        FmtMeta::Color(Color::RED),
+        "{Warning}: Kernel hit {Divid Error} on rip=0x{} and rsp=0x{}.\n",
+        FmtMeta::Color(Color::PURPLE),
         FmtMeta::Color(Color::YELLOW),
         FmtMeta::Pointer(rip as usize),
         FmtMeta::Pointer(rsp as usize)

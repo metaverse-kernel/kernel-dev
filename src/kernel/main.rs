@@ -1,10 +1,4 @@
-use crate::{
-    kernel::{
-        klog::{KernelLogger, LoggerLevel},
-        tty::tty::Tty,
-    },
-    message_raw,
-};
+use crate::kernel::tty::tty::Tty;
 
 #[no_mangle]
 extern "C" fn kmain_rust() -> ! {
