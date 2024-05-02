@@ -28,9 +28,6 @@ vscode下的`rust-analyzer`插件会在`src/lib.rs`中误报`can't find crate fo
 ]
 ```
 
-## 需要注意的还未解决的问题
+## 需要注意的问题
 
-* rust中所有有关字符串格式化的宏中，出现超过一个不止是`{}`的格式化占位符时内核必然崩溃。
-* rust中所有有关字符串格式化的宏中，出现需要调用自定义的`Debug trait`的类型时内核必然崩溃，推荐定义`ToString trait`并调用`.to_string()`后传入宏参数。
-* 鉴于以上两条原因，不建议在复杂的字符串格式化任务中使用`format!()`宏。推荐通过使用`::kernel::tty::tty::MessageBuilder`构造`kernel::tty::tty::Message`对象，或使用
-  `message`宏，并调用此对象的`.to_string()`方法实现格式化字符串。
+* 在任何情况下不要使用Rust的panic。
